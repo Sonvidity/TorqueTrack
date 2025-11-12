@@ -23,7 +23,7 @@ export function ServiceSchedule({ result }: { result: ActionResponse | null }) {
           </CardTitle>
           <CardDescription className="text-destructive/90">
             {result.error}
-          </Card-description>
+          </CardDescription>
         </CardHeader>
       </Card>
     );
