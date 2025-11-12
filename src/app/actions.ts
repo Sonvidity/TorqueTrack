@@ -36,6 +36,8 @@ export async function getServiceScheduleAction(values: FormValues): Promise<Acti
     turboType,
     superchargerKit,
     engineSwap,
+    lastServiceKms,
+    lastServiceItems,
   } = validatedFields.data;
 
   const aiInput: DynamicServiceIntervalsInput = {
@@ -52,6 +54,8 @@ export async function getServiceScheduleAction(values: FormValues): Promise<Acti
     },
     ...(engineKms > 0 && { engineKms }),
     ...(chassisKms > 0 && { chassisKms }),
+    ...(lastServiceKms && lastServiceKms > 0 && { lastServiceKms }),
+    ...(lastServiceItems && { lastServiceItems }),
   };
 
   try {

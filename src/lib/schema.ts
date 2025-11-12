@@ -12,4 +12,6 @@ export const formSchema = z.object({
   turboType: z.string().optional(),
   superchargerKit: z.string().optional(),
   engineSwap: z.string(),
+  lastServiceKms: z.number().min(0, "KMs must be a positive number.").optional(),
+  lastServiceItems: z.string().optional(),
 });

@@ -39,6 +39,8 @@ const DynamicServiceIntervalsInputSchema = z.object({
     ),
   engineKms: z.number().optional().describe('The kilometers on the engine, if different from chassis.'),
   chassisKms: z.number().optional().describe('The kilometers on the chassis.'),
+  lastServiceKms: z.number().optional().describe('The kilometers at the time of the last service.'),
+  lastServiceItems: z.string().optional().describe('A comma-separated list of items that were serviced last time (e.g., Oil Change, Spark Plugs).'),
 });
 
 export type DynamicServiceIntervalsInput = z.infer<
@@ -52,6 +54,7 @@ const DynamicServiceIntervalsOutputSchema = z.object({
       intervalKms: z.number().describe('The recommended interval in kilometers.'),
       intervalMonths: z.number().describe('The recommended interval in months.'),
       reason: z.string().describe('The reasoning behind the adjusted interval.'),
+      isDue: z.boolean().describe('Whether this service item is currently due based on the last service history provided. If no last service history is provided, this should be based on standard intervals from current KMs.'),
     })
   ),
 });
@@ -99,32 +102,22 @@ const prompt = ai.definePrompt({
   {{#if chassisKms}}
   - Chassis KMS: {{{chassisKms}}}
   {{/if}}
+  {{#if lastServiceKms}}
+  Last Service Details:
+  - Kilometers at last service: {{{lastServiceKms}}}
+  - Items serviced: {{{lastServiceItems}}}
+  {{/if}}
 
-  Based on this information, provide a service schedule with adjusted intervals, considering the modifications and driving habits. Explain the reasoning behind each adjustment.
+  Based on this information, provide a service schedule with adjusted intervals. 
+  For each item, you MUST determine if the service is currently due by comparing the recommended interval against the current vehicle kilometers and the last service details if provided. Set the 'isDue' flag to true if the service is due, and false otherwise.
+  Explain the reasoning behind each adjustment.
 
   Format the output as a JSON object with a "serviceSchedule" array. Each object in the array should have the following keys:
   - "item": The service item (e.g., oil change, spark plug replacement).
   - "intervalKms": The recommended interval in kilometers.
   - "intervalMonths": The recommended interval in months.
   - "reason": The reasoning behind the adjusted interval.
-
-  Example:
-  {
-    "serviceSchedule": [
-      {
-        "item": "Oil Change",
-        "intervalKms": 5000,
-        "intervalMonths": 3,
-        "reason": "Due to the turbo modification and hard driving habits, the oil should be changed more frequently."
-      },
-      {
-        "item": "Spark Plug Replacement",
-        "intervalKms": 30000,
-        "intervalMonths": 24,
-        "reason": "Standard interval."
-      }
-    ]
-  }
+  - "isDue": A boolean indicating if the service is due now.
   `,
 });
 

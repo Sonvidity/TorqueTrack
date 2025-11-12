@@ -19,6 +19,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
@@ -80,6 +81,8 @@ export function TorqueTrackForm() {
       turboType: "",
       superchargerKit: "",
       engineSwap: "stock",
+      lastServiceKms: 75000,
+      lastServiceItems: "Oil Change, Oil Filter",
     },
   });
 
@@ -121,10 +124,11 @@ export function TorqueTrackForm() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <Tabs defaultValue="vehicle">
-                <TabsList className="grid w-full grid-cols-3">
+                <TabsList className="grid w-full grid-cols-4">
                   <TabsTrigger value="vehicle">Vehicle</TabsTrigger>
                   <TabsTrigger value="usage">Usage</TabsTrigger>
                   <TabsTrigger value="mods">Modifications</TabsTrigger>
+                  <TabsTrigger value="history">Service History</TabsTrigger>
                 </TabsList>
 
                 <div className="pt-8">
@@ -264,6 +268,27 @@ export function TorqueTrackForm() {
                       </FormItem>
                     )} />
                   )}
+                </TabsContent>
+
+                <TabsContent value="history" className="space-y-6">
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <FormField control={form.control} name="lastServiceKms" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>KMs at Last Service</FormLabel>
+                          <FormControl><Input type="number" placeholder="e.g., 75000" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : e.target.valueAsNumber)} /></FormControl>
+                          <FormDescription>Kilometers shown on the odometer at your last service.</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                  </div>
+                   <FormField control={form.control} name="lastServiceItems" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Items Serviced</FormLabel>
+                          <FormControl><Textarea placeholder="e.g., Oil change, Spark plugs, Air filter" {...field} /></FormControl>
+                           <FormDescription>List the main items that were replaced or serviced.</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
                 </TabsContent>
                 </div>
               </Tabs>
