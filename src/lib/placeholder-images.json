@@ -1,3 +1,10 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-image",
+      "description": "A close-up of a high-performance car engine bay, showcasing intricate details and modifications.",
+      "imageUrl": "https://images.unsplash.com/photo-1606577924006-27d39b132ae2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxjYXIlMjBlbmdpbmV8ZW58MHx8fHwxNzYyODU2MjgzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "car engine"
+    }
+  ]
 }

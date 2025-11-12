@@ -1,0 +1,286 @@
+"use client";
+
+import { useState, useMemo } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import type { z } from "zod";
+import { getServiceScheduleAction, type ActionResponse } from "@/app/actions";
+import { formSchema } from "@/lib/schema";
+import { vehicles, commonEngineSwaps } from "@/lib/vehicles";
+
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ServiceSchedule } from "./service-schedule";
+import { Separator } from "@/components/ui/separator";
+
+function LoadingIndicator() {
+  return (
+    <div className="flex flex-col items-center justify-center gap-4 py-16">
+      <svg
+        className="h-16 w-16 animate-spin text-primary"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          className="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          strokeWidth="4"
+        ></circle>
+        <path
+          className="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+        ></path>
+      </svg>
+      <p className="font-headline text-lg text-primary animate-pulse">
+        Tuning Your Schedule...
+      </p>
+    </div>
+  );
+}
+
+export function TorqueTrackForm() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState<ActionResponse | null>(null);
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      make: "Toyota",
+      model: "86 / BRZ",
+      year: 2018,
+      chassisKms: 80000,
+      engineKms: 80000,
+      drivingHabits: "Spirited Weekend Drives",
+      stage: "none",
+      forcedInduction: "none",
+      turboType: "",
+      superchargerKit: "",
+      engineSwap: "stock",
+    },
+  });
+
+  const make = form.watch("make");
+  const model = form.watch("model");
+  const forcedInduction = form.watch("forcedInduction");
+
+  const availableModels = useMemo(() => {
+    return vehicles.find((v) => v.make === make)?.models || [];
+  }, [make]);
+
+  const availableYears = useMemo(() => {
+    return availableModels.find((m) => m.name === model)?.years || [];
+  }, [model, availableModels]);
+
+  const availableEngines = useMemo(() => {
+    const stockEngine = availableModels.find((m) => m.name === model)?.engine || "Stock Engine";
+    return [{name: stockEngine, value: "stock"}, ...commonEngineSwaps];
+  }, [model, availableModels])
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
+    setResult(null);
+    const actionResult = await getServiceScheduleAction(values);
+    setResult(actionResult);
+    setIsLoading(false);
+  }
+  
+  return (
+    <div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-headline text-3xl">Vehicle Configuration</CardTitle>
+          <CardDescription>
+            Enter your vehicle's details to generate a personalized service schedule.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              <Tabs defaultValue="vehicle">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="vehicle">Vehicle</TabsTrigger>
+                  <TabsTrigger value="usage">Usage</TabsTrigger>
+                  <TabsTrigger value="mods">Modifications</TabsTrigger>
+                </TabsList>
+
+                <div className="pt-8">
+                <TabsContent value="vehicle" className="space-y-6">
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                    <FormField control={form.control} name="make" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Make</FormLabel>
+                        <Select onValueChange={(value) => { field.onChange(value); form.setValue('model', ''); form.setValue('year', 0); }} defaultValue={field.value}>
+                          <FormControl><SelectTrigger><SelectValue placeholder="Select a make" /></SelectTrigger></FormControl>
+                          <SelectContent>
+                            {vehicles.map((v) => <SelectItem key={v.make} value={v.make}>{v.make}</SelectItem>)}
+                          </SelectContent>
+                        </Select><FormMessage />
+                      </FormItem>
+                    )} />
+                    <FormField control={form.control} name="model" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Model</FormLabel>
+                        <Select onValueChange={(value) => { field.onChange(value); form.setValue('year', 0); }} value={field.value} disabled={!make}>
+                          <FormControl><SelectTrigger><SelectValue placeholder="Select a model" /></SelectTrigger></FormControl>
+                          <SelectContent>
+                            {availableModels.map((m) => <SelectItem key={m.name} value={m.name}>{m.name}</SelectItem>)}
+                          </SelectContent>
+                        </Select><FormMessage />
+                      </FormItem>
+                    )} />
+                    <FormField control={form.control} name="year" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Year</FormLabel>
+                        <Select onValueChange={(value) => field.onChange(Number(value))} value={String(field.value)} disabled={!model}>
+                          <FormControl><SelectTrigger><SelectValue placeholder="Select a year" /></SelectTrigger></FormControl>
+                          <SelectContent>
+                            {availableYears.map((y) => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}
+                          </SelectContent>
+                        </Select><FormMessage />
+                      </FormItem>
+                    )} />
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="usage" className="space-y-6">
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <FormField control={form.control} name="chassisKms" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Chassis KMs</FormLabel>
+                        <FormControl><Input type="number" placeholder="e.g., 100000" {...field} onChange={e => field.onChange(e.target.valueAsNumber)} /></FormControl>
+                        <FormDescription>Total kilometers on the vehicle's body.</FormDescription><FormMessage />
+                      </FormItem>
+                    )} />
+                    <FormField control={form.control} name="engineKms" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Engine KMs</FormLabel>
+                        <FormControl><Input type="number" placeholder="e.g., 50000" {...field} onChange={e => field.onChange(e.target.valueAsNumber)} /></FormControl>
+                        <FormDescription>Leave same as chassis if original engine.</FormDescription><FormMessage />
+                      </FormItem>
+                    )} />
+                  </div>
+                  <FormField control={form.control} name="drivingHabits" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Primary Driving Style</FormLabel>
+                      <FormControl>
+                        <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-4 pt-2">
+                          {["Daily Commuting", "Spirited Weekend Drives", "Regular Track/Race Use"].map(habit => (
+                            <FormItem key={habit} className="flex items-center space-x-3 space-y-0">
+                              <FormControl><RadioGroupItem value={habit} /></FormControl>
+                              <FormLabel className="font-normal">{habit}</FormLabel>
+                            </FormItem>
+                          ))}
+                        </RadioGroup>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                </TabsContent>
+
+                <TabsContent value="mods" className="space-y-6">
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <FormField control={form.control} name="stage" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Modification Stage</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl><SelectTrigger><SelectValue placeholder="Select a stage" /></SelectTrigger></FormControl>
+                          <SelectContent>
+                            <SelectItem value="none">Stock / None</SelectItem>
+                            <SelectItem value="1">Stage 1 (Tune)</SelectItem>
+                            <SelectItem value="2">Stage 2 (Bolt-ons & Tune)</SelectItem>
+                            <SelectItem value="3">Stage 3 (Major build)</SelectItem>
+                          </SelectContent>
+                        </Select><FormMessage />
+                      </FormItem>
+                    )} />
+                    <FormField control={form.control} name="engineSwap" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Engine</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl><SelectTrigger><SelectValue placeholder="Select an engine" /></SelectTrigger></FormControl>
+                          <SelectContent>
+                            {availableEngines.map(engine => (
+                              <SelectItem key={engine.value} value={engine.value}>{engine.name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select><FormMessage />
+                      </FormItem>
+                    )} />
+                  </div>
+                   <FormField control={form.control} name="forcedInduction" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Forced Induction</FormLabel>
+                      <FormControl>
+                        <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-4 pt-2">
+                          {["none", "turbo", "supercharger"].map(type => (
+                            <FormItem key={type} className="flex items-center space-x-3 space-y-0">
+                              <FormControl><RadioGroupItem value={type} /></FormControl>
+                              <FormLabel className="font-normal capitalize">{type}</FormLabel>
+                            </FormItem>
+                          ))}
+                        </RadioGroup>
+                      </FormControl><FormMessage />
+                    </FormItem>
+                  )} />
+                  {forcedInduction === "turbo" && (
+                     <FormField control={form.control} name="turboType" render={({ field }) => (
+                      <FormItem className="animate-in fade-in-50">
+                        <FormLabel>Turbo Type</FormLabel>
+                        <FormControl><Input placeholder="e.g., Garrett G25-660" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                  )}
+                  {forcedInduction === "supercharger" && (
+                    <FormField control={form.control} name="superchargerKit" render={({ field }) => (
+                      <FormItem className="animate-in fade-in-50">
+                        <FormLabel>Supercharger Kit</FormLabel>
+                        <FormControl><Input placeholder="e.g., Jackson Racing C30" {...field} /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                  )}
+                </TabsContent>
+                </div>
+              </Tabs>
+              
+              <Separator />
+
+              <div className="flex justify-end">
+                <Button type="submit" disabled={isLoading} size="lg">
+                  Generate Schedule
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+      {isLoading && <LoadingIndicator />}
+      <ServiceSchedule result={result} />
+    </div>
+  );
+}
