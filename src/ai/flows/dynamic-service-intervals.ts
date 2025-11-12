@@ -10,6 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { googleAI } from '@genkit-ai/google-genai';
 
 const DynamicServiceIntervalsInputSchema = z.object({
   year: z.string().describe('The year of the vehicle.'),
@@ -134,14 +135,7 @@ const dynamicServiceIntervalsFlow = ai.defineFlow(
     outputSchema: DynamicServiceIntervalsOutputSchema,
   },
   async input => {
-    const {output} = await ai.generate({
-      prompt: prompt.prompt,
-      model: 'googleai/gemini-2.5-flash',
-      input,
-      output: {
-        schema: DynamicServiceIntervalsOutputSchema,
-      },
-    });
+    const {output} = await prompt(input);
     return output!;
   }
 );
