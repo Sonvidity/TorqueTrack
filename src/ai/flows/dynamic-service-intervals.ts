@@ -109,7 +109,11 @@ const prompt = ai.definePrompt({
   {{/if}}
 
   Based on this information, provide a service schedule with adjusted intervals. 
-  For each item, you MUST determine if the service is currently due by comparing the recommended interval against the current vehicle kilometers and the last service details if provided. Set the 'isDue' flag to true if the service is due, and false otherwise.
+  For each item, you MUST determine if the service is currently due. To do this, compare the recommended interval against the current vehicle kilometers and, MOST IMPORTANTLY, the last service details if they are provided.
+  
+  If 'lastServiceItems' contains an item (e.g., "Spark Plugs", "Oil Change"), you should consider that service as having been performed at 'lastServiceKms'. The item should only be marked as due ('isDue: true') if the recommended interval has passed since the 'lastServiceKms'. If the interval has not passed, it is NOT due.
+  
+  Set the 'isDue' flag to true if the service is due, and false otherwise.
   Explain the reasoning behind each adjustment.
 
   Format the output as a JSON object with a "serviceSchedule" array. Each object in the array should have the following keys:
