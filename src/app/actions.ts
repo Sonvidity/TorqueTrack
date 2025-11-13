@@ -53,15 +53,27 @@ export async function getServiceScheduleAction(values: FormValues): Promise<Acti
     const result = await getDynamicServiceIntervals(aiInput);
     return { success: true, data: result };
   } catch (error: any) {
-    console.error("Error in getServiceScheduleAction:", error);
-    // Provide more specific feedback if the AI fails
-    const errorMessage = error.message?.includes('SAFETY') 
-      ? "The AI model refused to generate a schedule due to safety concerns with the provided inputs. Please adjust and try again."
-      : "I'm still getting constant errors when inputting my cars details. Why? What is occurring?";
+    console.error("Error in getServiceScheduleAction:", JSON.stringify(error, null, 2));
+    
+    // Extract a more meaningful error message from the complex error object
+    let detailedError = "An unexpected AI error occurred. Please check the server logs.";
+    if (error.cause) {
+      // Genkit often wraps the root cause
+      const rootCause = error.cause;
+      if (rootCause.status && rootCause.message) {
+        detailedError = `AI Service Error (${rootCause.status}): ${rootCause.message}`;
+      } else if (rootCause.message) {
+        detailedError = rootCause.message;
+      }
+    } else if (error.message) {
+      detailedError = error.message;
+    }
+
+    const finalErrorMessage = `AI Error: ${detailedError}. This usually happens if the AI model refuses to answer based on the inputs or if there's a configuration issue. Please try adjusting your inputs.`;
     
     return { 
       success: false, 
-      error: errorMessage
+      error: finalErrorMessage
     };
   }
 }
