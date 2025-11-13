@@ -10,5 +10,4 @@ export {
   useFirestore,
 } from './provider';
 
-export * from './client-provider';
 export { useUser } from './auth/use-user';

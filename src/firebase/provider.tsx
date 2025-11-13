@@ -1,28 +1,34 @@
 'use client';
-import { createContext, useContext } from 'react';
+
+import {
+  createContext,
+  useContext,
+  type ReactNode,
+} from 'react';
+import type { FirebaseApp } from 'firebase/app';
 import type { Auth } from 'firebase/auth';
 import type { Firestore } from 'firebase/firestore';
-import type { FirebaseApp } from 'firebase/app';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 
 type FirebaseContextValue = {
-  auth: Auth;
-  db: Firestore;
-  app: FirebaseApp;
+  auth: Auth | null;
+  db: Firestore | null;
+  app: FirebaseApp | null;
 };
 
 const FirebaseContext = createContext<FirebaseContextValue | null>(null);
 
-export function FirebaseProvider({ 
-    children, 
-    value 
-}: { 
-    children: React.ReactNode;
-    value: FirebaseContextValue;
-}) {
+type FirebaseProviderProps = {
+  children: ReactNode;
+  instances: FirebaseContextValue;
+};
 
+export function FirebaseProvider({
+  children,
+  instances,
+}: FirebaseProviderProps) {
   return (
-    <FirebaseContext.Provider value={value}>
+    <FirebaseContext.Provider value={instances}>
       {children}
       <FirebaseErrorListener />
     </FirebaseContext.Provider>
@@ -31,34 +37,32 @@ export function FirebaseProvider({
 
 export const useFirebase = () => {
   const context = useContext(FirebaseContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useFirebase must be used within a FirebaseProvider');
   }
   return context;
 };
 
 export const useFirebaseApp = () => {
-    const context = useContext(FirebaseContext);
-    if (!context) {
-      throw new Error('useFirebaseApp must be used within a FirebaseProvider');
-    }
-    return context.app;
-}
+  const context = useContext(FirebaseContext);
+  if (context === undefined) {
+    throw new Error('useFirebaseApp must be used within a FirebaseProvider');
+  }
+  return context?.app ?? null;
+};
 
 export const useAuth = () => {
   const context = useContext(FirebaseContext);
-  if (!context) {
-    // This can happen during the initial client-side render before the provider is initialized.
-    // Return null or a dummy object, or handle it in the component.
-    return null;
+  if (context === undefined) {
+    throw new Error('useAuth must be used within a FirebaseProvider');
   }
-  return context.auth;
-}
+  return context?.auth ?? null;
+};
 
 export const useFirestore = () => {
-    const context = useContext(FirebaseContext);
-    if (!context) {
-      throw new Error('useFirestore must be used within a FirebaseProvider');
-    }
-    return context.db;
-}
+  const context = useContext(FirebaseContext);
+  if (context === undefined) {
+    throw new Error('useFirestore must be used within a FirebaseProvider');
+  }
+  return context?.db ?? null;
+};

@@ -3,8 +3,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useUser } from '@/firebase/auth/use-user';
-import { getAuth, signOut } from 'firebase/auth';
+import { useUser, useAuth } from '@/firebase/index';
+import { signOut } from 'firebase/auth';
 import { LogIn, LogOut, Car } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/app/components/icons/logo';
@@ -18,14 +18,15 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useFirebaseApp } from '@/firebase/provider';
 
 function UserNav() {
-  const app = useFirebaseApp();
+  const auth = useAuth();
   const { user, isLoading } = useUser();
 
-  if (isLoading) {
-    return null;
+  if (isLoading || !auth) {
+    return (
+      <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
+    );
   }
 
   if (!user) {
@@ -41,7 +42,7 @@ function UserNav() {
 
   const handleLogout = async () => {
     try {
-      await signOut(getAuth(app));
+      await signOut(auth);
     } catch (error) {
       console.error('Error signing out:', error);
     }
