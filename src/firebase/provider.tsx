@@ -1,5 +1,5 @@
 'use client';
-import { createContext, useContext, useMemo } from 'react';
+import { createContext, useContext } from 'react';
 import type { Auth } from 'firebase/auth';
 import type { Firestore } from 'firebase/firestore';
 import type { FirebaseApp } from 'firebase/app';
@@ -20,10 +20,9 @@ export function FirebaseProvider({
     children: React.ReactNode;
     value: FirebaseContextValue;
 }) {
-  const memoizedValue = useMemo(() => value, [value]);
 
   return (
-    <FirebaseContext.Provider value={memoizedValue}>
+    <FirebaseContext.Provider value={value}>
       {children}
       <FirebaseErrorListener />
     </FirebaseContext.Provider>
@@ -49,7 +48,9 @@ export const useFirebaseApp = () => {
 export const useAuth = () => {
   const context = useContext(FirebaseContext);
   if (!context) {
-    throw new Error('useAuth must be used within a FirebaseProvider');
+    // This can happen during the initial client-side render before the provider is initialized.
+    // Return null or a dummy object, or handle it in the component.
+    return null;
   }
   return context.auth;
 }

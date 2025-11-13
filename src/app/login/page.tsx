@@ -11,7 +11,8 @@ import { useAuth, useUser } from '@/firebase/index';
 
 export default function LoginPage() {
   const auth = useAuth();
-  const [signInWithGoogle, , loading, error] = useSignInWithGoogle(auth);
+  // The useSignInWithGoogle hook can handle auth being null initially
+  const [signInWithGoogle, , loading, error] = useSignInWithGoogle(auth ?? undefined);
   const router = useRouter();
   const { user } = useUser();
 
@@ -34,8 +35,8 @@ export default function LoginPage() {
         <CardContent className="space-y-4">
           <Button
             className="w-full"
-            onClick={() => signInWithGoogle()}
-            disabled={loading}
+            onClick={() => signInWithGoogle && signInWithGoogle()}
+            disabled={loading || !auth}
           >
             <Chrome className="mr-2 h-4 w-4" />
             Sign In with Google
