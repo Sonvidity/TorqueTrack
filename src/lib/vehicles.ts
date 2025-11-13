@@ -1,3 +1,4 @@
+
 export type Vehicle = {
   make: string;
   models: {
@@ -114,6 +115,9 @@ export const vehicles: Vehicle[] = [
       { name: "Z (RZ34)", years: Array.from({ length: 2025 - 2023 + 1 }, (_, i) => 2023 + i), engine: "VR30DDTT" },
       { name: "GT-R (R35)", years: Array.from({ length: 2025 - 2009 + 1 }, (_, i) => 2009 + i), engine: "VR38DETT" },
       { name: "Silvia (S15)", years: Array.from({ length: 2002 - 1999 + 1 }, (_, i) => 1999 + i), engine: "SR20DE / SR20DET" },
+      { name: "Skyline (R32)", years: Array.from({ length: 1994 - 1989 + 1 }, (_, i) => 1989 + i), engine: "RB20DE(T) / RB25DE / RB26DETT" },
+      { name: "Skyline (R33)", years: Array.from({ length: 1998 - 1993 + 1 }, (_, i) => 1993 + i), engine: "RB25DE(T) / RB26DETT" },
+      { name: "Skyline (R34)", years: Array.from({ length: 2002 - 1998 + 1 }, (_, i) => 1998 + i), engine: "RB25DE(T) / RB26DETT" },
       { name: "Skyline (V35)", years: Array.from({ length: 2007 - 2001 + 1 }, (_, i) => 2001 + i), engine: "VQ25/30/35" },
       { name: "Skyline (V36)", years: Array.from({ length: 2014 - 2006 + 1 }, (_, i) => 2006 + i), engine: "VQ25/35/37" },
       { name: "Navara (D40)", years: Array.from({ length: 2015 - 2005 + 1 }, (_, i) => 2005 + i), engine: "YD25 / VQ40" },
@@ -177,3 +181,5 @@ export const commonEngineSwaps = [
     { name: 'Ford Barra', value: 'Barra' },
     { name: 'Other / Custom', value: 'custom' },
 ];
+
+    
