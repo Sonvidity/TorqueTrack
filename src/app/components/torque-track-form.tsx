@@ -144,7 +144,7 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
     
     setIsSaving(true);
     const values = form.getValues();
-    const result = await saveVehicleAction(values);
+    const result = await saveVehicleAction(user.uid, values);
 
     if (result.success) {
       toast({

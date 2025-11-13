@@ -1,12 +1,10 @@
+
 "use server";
 
 import { getDynamicServiceIntervals, type DynamicServiceIntervalsInput, type DynamicServiceIntervalsOutput } from "@/ai/flows/dynamic-service-intervals";
 import { z } from "zod";
 import { formSchema, type FormValues } from "@/lib/schema";
 import { saveVehicle as saveVehicleToDb } from "@/firebase/firestore/mutations";
-import { auth } from 'firebase-admin';
-import { getTokens } from 'next-firebase-auth-edge/lib/next/tokens';
-import { cookies } from 'next/headers';
 import { nanoid } from "nanoid";
 
 export type ActionResponse = {
@@ -38,35 +36,24 @@ export async function getServiceScheduleAction(values: FormValues): Promise<Acti
   }
 }
 
-export async function saveVehicleAction(values: FormValues): Promise<{success: boolean; error?: string, vehicleId?: string}> {
+export async function saveVehicleAction(userId: string, values: FormValues): Promise<{success: boolean; error?: string, vehicleId?: string}> {
     const validatedFields = formSchema.safeParse(values);
     if (!validatedFields.success) {
         return { success: false, error: "Invalid form data." };
     }
 
-    const tokens = await getTokens(cookies(), {
-        apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
-        cookieName: 'AuthToken',
-        cookieSignatureKeys: [process.env.COOKIE_SECRET_CURRENT!, process.env.COOKIE_SECRET_PREVIOUS!],
-        serviceAccount: {
-            projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!,
-            clientEmail: process.env.FIREBASE_CLIENT_EMAIL!,
-            privateKey: process.env.FIREBASE_PRIVATE_KEY!.replace(/\\n/g, '\n'),
-        }
-    });
-
-    if (!tokens) {
+    if (!userId) {
         return { success: false, error: "User not authenticated." };
     }
 
     const vehicleData = {
         id: nanoid(),
         ...validatedFields.data,
-        userId: tokens.decodedToken.uid,
+        userId: userId,
     }
 
     try {
-        await saveVehicleToDb(tokens.decodedToken.uid, vehicleData.id, vehicleData);
+        await saveVehicleToDb(userId, vehicleData.id, vehicleData);
         return { success: true, vehicleId: vehicleData.id };
     } catch (e) {
         console.error('Failed to save vehicle:', e)
