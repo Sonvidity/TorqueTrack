@@ -11,13 +11,23 @@ export const vehicles: Vehicle[] = [
   {
     make: "Honda",
     models: [
+      { name: "Accord (CF/CL)", years: Array.from({ length: 2002 - 1997 + 1 }, (_, i) => 1997 + i), engine: "F-series / H-series" },
       { name: "Accord (CL)", years: Array.from({ length: 2008 - 2002 + 1 }, (_, i) => 2002 + i), engine: "K24A" },
       { name: "Accord (CU)", years: Array.from({ length: 2015 - 2008 + 1 }, (_, i) => 2008 + i), engine: "K24Z" },
+      { name: "Accord (CR)", years: Array.from({ length: 2017 - 2013 + 1 }, (_, i) => 2013 + i), engine: "K24W" },
+      { name: "Accord (CV)", years: Array.from({ length: 2022 - 2018 + 1 }, (_, i) => 2018 + i), engine: "L15B7 / K20C4" },
       { name: "Civic (EP)", years: Array.from({ length: 2005 - 2001 + 1 }, (_, i) => 2001 + i), engine: "D17 / K20A" },
       { name: "Civic (FD/FN)", years: Array.from({ length: 2011 - 2006 + 1 }, (_, i) => 2006 + i), engine: "R18A / K20Z" },
       { name: "Civic (FB/FG)", years: Array.from({ length: 2015 - 2012 + 1 }, (_, i) => 2012 + i), engine: "R18Z / K24Z" },
       { name: "Civic (FC/FK)", years: Array.from({ length: 2021 - 2016 + 1 }, (_, i) => 2016 + i), engine: "L15B7 / K20C" },
       { name: "Civic (FE/FL)", years: Array.from({ length: 2025 - 2022 + 1 }, (_, i) => 2022 + i), engine: "L15C / K20C" },
+      { name: "CR-V (RD)", years: Array.from({ length: 2001 - 1997 + 1 }, (_,i) => 1997 + i), engine: "B20B" },
+      { name: "CR-V (RD)", years: Array.from({ length: 2006 - 2002 + 1 }, (_,i) => 2002 + i), engine: "K24A1" },
+      { name: "CR-V (RE)", years: Array.from({ length: 2011 - 2007 + 1 }, (_,i) => 2007 + i), engine: "R20A / K24Z" },
+      { name: "CR-V (RM)", years: Array.from({ length: 2016 - 2012 + 1 }, (_,i) => 2012 + i), engine: "R20A / K24Z" },
+      { name: "CR-V (RW)", years: Array.from({ length: 2022 - 2017 + 1 }, (_,i) => 2017 + i), engine: "L15B7" },
+      { name: "HR-V (GH)", years: Array.from({ length: 2006 - 1999 + 1 }, (_,i) => 1999 + i), engine: "D16W" },
+      { name: "HR-V (RU)", years: Array.from({ length: 2021 - 2015 + 1 }, (_,i) => 2015 + i), engine: "L15B / R18Z" },
       { name: "Integra (DC5)", years: Array.from({ length: 2006 - 2001 + 1 }, (_, i) => 2001 + i), engine: "K20A" },
       { name: "S2000 (AP)", years: Array.from({ length: 2009 - 1999 + 1 }, (_, i) => 1999 + i), engine: "F20C / F22C" },
     ],
@@ -86,6 +96,8 @@ export const vehicles: Vehicle[] = [
         { name: "Lancer Evolution (VIII)", years: [2003, 2004, 2005], engine: "4G63T" },
         { name: "Lancer Evolution (IX)", years: [2005, 2006, 2007], engine: "4G63T (MIVEC)" },
         { name: "Lancer Evolution (X)", years: Array.from({ length: 2016 - 2008 + 1 }, (_, i) => 2008 + i), engine: "4B11T" },
+        { name: "Pajero (NM/NP)", years: Array.from({ length: 2006 - 2000 + 1 }, (_,i) => 2000 + i), engine: "6G74 / 4M41" },
+        { name: "Pajero (NS/NT)", years: Array.from({ length: 2011 - 2006 + 1 }, (_,i) => 2006 + i), engine: "6G75 / 4M41" },
         { name: "Triton", years: Array.from({ length: 2025 - 2006 + 1 }, (_, i) => 2006 + i), engine: "4D56 / 4M41 / 4N15" },
     ],
   },
@@ -129,6 +141,13 @@ export const vehicles: Vehicle[] = [
       { name: "Golf R (MK7)", years: Array.from({ length: 2020 - 2013 + 1 }, (_, i) => 2013 + i), engine: "EA888 Gen3" },
     ],
   },
+  {
+    make: "Mercedes-Benz",
+    models: [
+      { name: "ML500 (W164)", years: Array.from({ length: 2011 - 2005 + 1 }, (_,i) => 2005 + i), engine: "M113 V8 / M273 V8"},
+      { name: "ML500 (W166)", years: Array.from({ length: 2015 - 2012 + 1 }, (_,i) => 2012 + i), engine: "M278 V8 Bi-Turbo"},
+    ]
+  }
 ];
 
 export const commonEngineSwaps = [
