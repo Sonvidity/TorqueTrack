@@ -1,7 +1,7 @@
 
 import { MainNav } from "@/app/components/main-nav";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Rocket, Wrench, Lightbulb, Bot, Database, Server } from "lucide-react";
+import { Rocket, Wrench, Lightbulb, Database, Server, GitCommitHorizontal } from "lucide-react";
 
 function Header() {
     return (
@@ -17,32 +17,32 @@ const steps = [
     {
         icon: <Database className="h-8 w-8 text-primary" />,
         title: "1. Baseline Manufacturer Data",
-        description: "The process starts with a baseline. We have a simplified internal database containing the standard, manufacturer-recommended service intervals for common items like 'Engine Oil & Filter' (10,000 km), 'Brake Fluid' (40,000 km), and 'Spark Plugs' (100,000 km). We also have specific overrides for certain models known to have different requirements (e.g., a Toyota 86 has a 90,000 km interval for spark plugs)."
+        description: "The process starts with a baseline. We have an internal database of standard, manufacturer-recommended service intervals for common items (e.g., 'Engine Oil & Filter' at 10,000 km, 'Spark Plugs' at 100,000 km). This provides the foundation for your schedule."
     },
     {
-        icon: <Bot className="h-8 w-8 text-primary" />,
-        title: "2. AI Analysis & Interval Adjustment",
-        description: "This is where the magic happens. Your vehicle's details, selected modifications, and driving style are sent to a powerful AI model. The AI acts as an expert mechanic, using the baseline data as a starting point and then making intelligent adjustments."
+        icon: <GitCommitHorizontal className="h-8 w-8 text-primary" />,
+        title: "2. Rule-Based Adjustments",
+        description: "Instead of a fragile AI, we use a clear, rule-based engine to adjust your schedule. This engine applies multipliers to the baseline intervals based on the modifications and driving style you select. This process is deterministic and reliable."
     },
     {
         icon: <Rocket className="h-8 w-8 text-primary" />,
         title: "3. Impact of Modifications",
-        description: "The AI understands that performance parts increase stress on the vehicle. If you've selected 'Stage 2', 'Turbo', or 'Supercharger', the AI will significantly shorten the service intervals for related components. For example, it might cut the 'Engine Oil & Filter' interval in half (from 10,000 km to 5,000 km) and reduce the 'Spark Plugs' interval from 100,000 km to 60,000 km, providing a reason like 'Increased engine stress from turbo requires more frequent oil changes to ensure proper lubrication and cooling.'"
+        description: "Performance parts increase stress. Our rules apply specific reductions: Stage 1 reduces intervals by 20%, Stage 2 by 40%, and Stage 3 by 60% for engine components. A turbo or supercharger applies a flat 50% reduction to engine-related intervals. The most significant reduction is always used."
     },
     {
         icon: <Wrench className="h-8 w-8 text-primary" />,
         title: "4. Impact of Driving Style",
-        description: "Your driving habits are just as important. If you select 'Regular Track/Race Use', the AI knows to be more aggressive with its recommendations. It will shorten intervals for wear-and-tear items like 'Brake Fluid', 'Tire Rotation', and fluids, explaining that 'Aggressive driving and track use increases fluid temperatures and brake wear, requiring more frequent checks and replacements.'"
+        description: "'Spirited Weekend Drives' applies a 15% reduction to wear items like fluids and brakes. 'Regular Track/Race Use' is much more aggressive, applying a 50% reduction to those same items, ensuring your car is safe for high-performance driving."
     },
     {
         icon: <Lightbulb className="h-8 w-8 text-primary" />,
-        title: "5. Impact of Service History",
-        description: "The AI's output is an *adjusted service interval*, not a final verdict. The final calculation of what's 'Due Now' happens in your browser. Our application code takes the AI's recommended intervals and compares them against the service history you provided. For example, if the AI recommends a 60,000 km spark plug interval, but you indicated in the 'Items Serviced' box that you replaced them at 166,000 km, our code calculates that only ~4,000 km have passed, and therefore, they are not due."
+        title: "5. Calculating 'Due Now' (Service History)",
+        description: "The final calculation of what's 'Due Now' happens in your browser. This logic takes the adjusted intervals from the rules engine and compares them against the service history you provided. The KMs you entered for your last service and the items serviced have the highest priority."
     },
     {
         icon: <Server className="h-8 w-8 text-primary" />,
         title: "6. Handling Engine Swaps",
-        description: "Your input in the 'Service History' tab is crucial for engine swaps. When you provide the 'Chassis KMs at Swap' and the 'Engine KMs at Swap', you are setting a new 'birth date' for all engine components. Our code uses this as the baseline for calculating engine-related service intervals. This logic overrides any older service history for engine parts, ensuring the schedule is based on the new engine's life, not the car's."
+        description: "Your inputs in the 'Service History' tab are crucial for engine swaps. When you provide 'Chassis KMs at Swap' and 'Engine KMs at Swap', you set a new 'birth date' for all engine components. Our code uses this as the baseline for calculating engine-related intervals, ensuring the schedule is based on the new engine's life, not the car's."
     }
 ]
 
@@ -58,7 +58,7 @@ export default function HowItWorksPage() {
                     How TorqueTrack Works
                 </h1>
                 <p className="max-w-[700px] mx-auto text-foreground/80 md:text-xl mt-4">
-                    From your inputs to your personalized schedule, here’s a step-by-step breakdown of how our AI mechanic crafts its recommendations.
+                    From your inputs to your personalized schedule, here’s a step-by-step breakdown of how our rule-based engine crafts its recommendations.
                 </p>
             </div>
             

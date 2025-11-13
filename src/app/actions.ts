@@ -1,16 +1,16 @@
 
 "use server";
 
-import { getDynamicServiceIntervals, type DynamicServiceIntervalsInput, type DynamicServiceIntervalsOutput } from "@/ai/flows/dynamic-service-intervals";
 import { getStandardServiceIntervals } from "@/ai/tools/service-data-tool";
 import { z } from "zod";
 import { formSchema, type FormValues } from "@/lib/schema";
 import { saveVehicle as saveVehicleToDb } from "@/firebase/firestore/mutations";
 import { nanoid } from "nanoid";
+import { getRuleBasedServiceIntervals, type RuleBasedIntervalsInput } from "@/lib/rule-based-intervals";
 
 export type ActionResponse = {
   success: boolean;
-  data?: DynamicServiceIntervalsOutput;
+  data?: { serviceSchedule: any[] };
   error?: string;
   issues?: z.ZodIssue[];
 }
@@ -41,35 +41,24 @@ export async function getServiceScheduleAction(values: FormValues): Promise<Acti
     }
   }
   
-  // Step 1: Get the baseline service intervals first.
-  const standardIntervals = await getStandardServiceIntervals({
-    make: validatedFields.data.make,
-    model: validatedFields.data.model,
-  });
-
-  const aiInput = mapFormToAIInput(validatedFields.data, standardIntervals.intervals);
-
   try {
-    const result = await getDynamicServiceIntervals(aiInput);
-    return { success: true, data: result };
-  } catch (error: any) {
-    console.error("Error in getServiceScheduleAction:", JSON.stringify(error, null, 2));
-    
-    // Extract a more meaningful error message from the complex error object
-    let detailedError = "An unexpected AI error occurred. Please check the server logs.";
-    if (error.cause) {
-      // Genkit often wraps the root cause
-      const rootCause = error.cause;
-      if (rootCause.status && rootCause.message) {
-        detailedError = `AI Service Error (${rootCause.status}): ${rootCause.message}`;
-      } else if (rootCause.message) {
-        detailedError = rootCause.message;
-      }
-    } else if (error.message) {
-      detailedError = error.message;
-    }
+    // Step 1: Get the baseline service intervals first.
+    const standardIntervals = await getStandardServiceIntervals({
+      make: validatedFields.data.make,
+      model: validatedFields.data.model,
+    });
 
-    const finalErrorMessage = `AI Error: ${detailedError}. This usually happens if the AI model refuses to answer based on the inputs or if there's a configuration issue. Please try adjusting your inputs.`;
+    const ruleInput = mapFormToRuleInput(validatedFields.data, standardIntervals.intervals);
+
+    // Step 2: Get the adjusted schedule from the new rule-based engine.
+    const result = getRuleBasedServiceIntervals(ruleInput);
+    
+    return { success: true, data: { serviceSchedule: result } };
+
+  } catch (error: any) {
+    console.error("Error in getServiceScheduleAction:", error);
+    
+    const finalErrorMessage = `An unexpected error occurred: ${error.message || 'Please check the server logs.'}`;
     
     return { 
       success: false, 
@@ -114,29 +103,18 @@ export async function saveVehicleAction(userId: string, values: FormValues): Pro
 }
 
 
-function mapFormToAIInput(data: FormValues, standardIntervals: any[]): DynamicServiceIntervalsInput {
+function mapFormToRuleInput(data: FormValues, standardIntervals: any[]): RuleBasedIntervalsInput {
     const {
-        make,
-        model,
-        year,
         drivingHabits,
         stage,
         forcedInduction,
-        turboType,
-        superchargerKit,
-        engineSwap,
       } = data;
 
       return {
-        year: year.toString(),
-        make,
-        model,
         drivingHabits,
         modifications: {
-            ...(stage !== 'none' && { stage }),
-            ...(forcedInduction === 'turbo' && { turbo: turboType }),
-            ...(forcedInduction === 'supercharger' && { supercharger: superchargerKit }),
-            ...(engineSwap !== 'stock' && { engineSwap }),
+            stage,
+            forcedInduction,
         },
         standardIntervals,
       };
