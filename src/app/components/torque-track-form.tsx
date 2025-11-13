@@ -71,7 +71,7 @@ export function TorqueTrackForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       make: "Toyota",
-      model: "86 / BRZ",
+      model: "86 / BRZ (ZN6)",
       year: 2018,
       chassisKms: 80000,
       engineKms: 80000,
@@ -112,7 +112,7 @@ export function TorqueTrackForm() {
   }
   
   return (
-    <div>
+    <div id="form">
       <Card>
         <CardHeader>
           <CardTitle className="font-headline text-3xl">Vehicle Configuration</CardTitle>
