@@ -6,8 +6,7 @@ import { MainNav } from '@/app/components/main-nav';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { useUser, useFirestore, useCollection } from '@/firebase/index';
-import { useMemo } from 'react';
+import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase/index';
 import { collection } from 'firebase/firestore';
 import type { Vehicle } from '@/lib/schema';
 import { Car, PlusCircle } from 'lucide-react';
@@ -51,7 +50,7 @@ function VehicleList() {
     const { user } = useUser();
     const firestore = useFirestore();
 
-    const vehiclesCollection = useMemo(() => {
+    const vehiclesCollection = useMemoFirebase(() => {
         if (!user || !firestore) return null;
         return collection(firestore, 'users', user.uid, 'vehicles');
     }, [user, firestore]);
