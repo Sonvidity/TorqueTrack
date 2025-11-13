@@ -16,7 +16,7 @@ const DynamicServiceIntervalsInputSchema = z.object({
   year: z.string().describe('The year of the vehicle.'),
   make: z.string().describe('The make of the vehicle.'),
   model: z.string().describe('The model of the vehicle.'),
-  kms: z.number().describe('The current kilometers of the vehicle.'),
+  kms: z.number().describe('The current kilometers of the vehicle chassis.'),
   modifications: z
     .object({
       turbo: z.string().optional().describe('The type of turbo installed, if any.'),
@@ -37,8 +37,10 @@ const DynamicServiceIntervalsInputSchema = z.object({
     .describe(
       'Description of the driving habits, e.g., daily driving, track days, driven hard.'
     ),
-  engineKms: z.number().optional().describe('The kilometers on the engine, if different from chassis.'),
-  chassisKms: z.number().optional().describe('The kilometers on the chassis.'),
+  engineKms: z.number().optional().describe('The current kilometers on the engine, if different from chassis.'),
+  chassisKms: z.number().optional().describe('The current kilometers on the chassis.'),
+  engineSwapKms: z.number().optional().describe('Chassis KMs when the engine was swapped.'),
+  engineKmsAtSwap: z.number().optional().describe('KMs on the new engine at the time of the swap.'),
   lastServiceKms: z.number().optional().describe('The kilometers at the time of the last service.'),
   lastServiceItems: z.string().optional().describe('A comma-separated list of items that were serviced last time (e.g., Oil Change, Spark Plugs).'),
 });
@@ -79,7 +81,11 @@ const prompt = ai.definePrompt({
   - Year: {{{year}}}
   - Make: {{{make}}}
   - Model: {{{model}}}
-  - Kilometers: {{{kms}}}
+  - Chassis Kilometers: {{{kms}}}
+  {{#if engineKms}}
+  - Current Engine KMS: {{{engineKms}}}
+  {{/if}}
+  
   {{#if modifications}}
   Modifications:
   {{#if modifications.turbo}}
@@ -95,26 +101,28 @@ const prompt = ai.definePrompt({
   - Stage: {{{modifications.stage}}}
   {{/if}}
   {{/if}}
+
   - Driving Habits: {{{drivingHabits}}}
-  {{#if engineKms}}
-  - Engine KMS: {{{engineKms}}}
+
+  {{#if engineSwapKms}}
+  Engine Swap Details:
+  - Chassis KMs at Swap: {{{engineSwapKms}}}
+  - Engine KMs at Swap: {{{engineKmsAtSwap}}}
+  - You MUST assume a full major service (including all fluids, spark plugs, and belts) was completed on the replacement engine at the time of the swap unless the user's service history explicitly states otherwise for a more recent service. This means the effective service life for engine components starts from this point.
   {{/if}}
-  {{#if chassisKms}}
-  - Chassis KMS: {{{chassisKms}}}
-  {{/if}}
+  
   {{#if lastServiceKms}}
   Last Service Details:
   - Kilometers at last service: {{{lastServiceKms}}}
   - Items serviced: {{{lastServiceItems}}}
   {{/if}}
 
-  Based on this information, provide a service schedule with adjusted intervals. 
-  For each item, you MUST determine if the service is currently due. To do this, compare the recommended interval against the current vehicle kilometers and, MOST IMPORTANTLY, the last service details if they are provided.
-  
-  If 'lastServiceItems' contains an item (e.g., "Spark Plugs", "Oil Change"), you should consider that service as having been performed at 'lastServiceKms'. The item should only be marked as due ('isDue: true') if the recommended interval has passed since the 'lastServiceKms'. If the interval has not passed, it is NOT due.
-  
-  Set the 'isDue' flag to true if the service is due, and false otherwise.
-  Explain the reasoning behind each adjustment.
+  Based on ALL this information, provide a service schedule. 
+  For each item, you MUST determine if the service is currently due. To do this, you must consider the correct base mileage. 
+  - For chassis items (brakes, suspension), use the chassis KMs.
+  - For engine-specific items (oil, spark plugs, belts), you MUST use the engine's effective mileage. If an engine swap occurred, the effective mileage is the KMs done SINCE the swap. If 'lastServiceItems' is provided for an engine item, that is the most recent event and should be used as the starting point for that item's interval.
+
+  Set the 'isDue' flag to true if the service is due, and false otherwise. Explain the reasoning behind each adjustment.
 
   Format the output as a JSON object with a "serviceSchedule" array. Each object in the array should have the following keys:
   - "item": The service item (e.g., oil change, spark plug replacement).

@@ -36,6 +36,8 @@ export async function getServiceScheduleAction(values: FormValues): Promise<Acti
     turboType,
     superchargerKit,
     engineSwap,
+    engineSwapKms,
+    engineKmsAtSwap,
     lastServiceKms,
     lastServiceItems,
   } = validatedFields.data;
@@ -54,6 +56,8 @@ export async function getServiceScheduleAction(values: FormValues): Promise<Acti
     },
     ...(engineKms > 0 && { engineKms }),
     ...(chassisKms > 0 && { chassisKms }),
+    ...(engineSwapKms && engineSwapKms > 0 && { engineSwapKms }),
+    ...(engineKmsAtSwap && engineKmsAtSwap > 0 && { engineKmsAtSwap }),
     ...(lastServiceKms && lastServiceKms > 0 && { lastServiceKms }),
     ...(lastServiceItems && { lastServiceItems }),
   };

@@ -89,6 +89,7 @@ export function TorqueTrackForm() {
   const make = form.watch("make");
   const model = form.watch("model");
   const forcedInduction = form.watch("forcedInduction");
+  const engineSwap = form.watch("engineSwap");
 
   const availableModels = useMemo(() => {
     return vehicles.find((v) => v.make === make)?.models || [];
@@ -235,6 +236,26 @@ export function TorqueTrackForm() {
                       </FormItem>
                     )} />
                   </div>
+                  {engineSwap !== 'stock' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 border rounded-md bg-muted/50 animate-in fade-in-50">
+                       <FormField control={form.control} name="engineSwapKms" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Chassis KMs at Swap</FormLabel>
+                          <FormControl><Input type="number" placeholder="e.g., 120000" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : e.target.valueAsNumber)} /></FormControl>
+                          <FormDescription>KMs on the car when the engine was installed.</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                       <FormField control={form.control} name="engineKmsAtSwap" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Engine KMs at Swap</FormLabel>
+                          <FormControl><Input type="number" placeholder="e.g., 76000" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : e.target.valueAsNumber)} /></FormControl>
+                          <FormDescription>KMs on the replacement engine when it was installed.</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                    </div>
+                  )}
                    <FormField control={form.control} name="forcedInduction" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Forced Induction</FormLabel>
@@ -276,7 +297,7 @@ export function TorqueTrackForm() {
                         <FormItem>
                           <FormLabel>KMs at Last Service</FormLabel>
                           <FormControl><Input type="number" placeholder="e.g., 75000" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : e.target.valueAsNumber)} /></FormControl>
-                          <FormDescription>Kilometers shown on the odometer at your last service.</FormDescription>
+                          <FormDescription>Odometer reading at your last service.</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )} />
@@ -284,7 +305,7 @@ export function TorqueTrackForm() {
                    <FormField control={form.control} name="lastServiceItems" render={({ field }) => (
                         <FormItem>
                           <FormLabel>Items Serviced</FormLabel>
-                          <FormControl><Textarea placeholder="e.g., Oil change, Spark plugs, Air filter" {...field} /></FormControl>
+                          <FormControl><Textarea placeholder="e.g., Oil change, Spark plugs, Air filter. If engine was swapped, mention if a full service was done." {...field} /></FormControl>
                            <FormDescription>List the main items that were replaced or serviced.</FormDescription>
                           <FormMessage />
                         </FormItem>
