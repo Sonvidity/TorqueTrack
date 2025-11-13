@@ -1,0 +1,136 @@
+/**
+ * @file Firestore Security Rules for TorqueTrack
+ * @description This ruleset enforces a strict user-ownership model for vehicle and maintenance data.
+ *
+ * Data Structure:
+ * All data is nested under /users/{userId}, ensuring that only the authenticated user can access their own data.
+ * - /users/{userId}/vehicles/{vehicleId}
+ * - /users/{userId}/vehicles/{vehicleId}/serviceSchedules/{serviceScheduleId}
+ * - /users/{userId}/vehicles/{vehicleId}/serviceSchedules/{serviceScheduleId}/maintenanceItems/{maintenanceItemId}
+ * - /users/{userId}/vehicles/{vehicleId}/modifications/{modificationId}
+ *
+ * Key Security Decisions:
+ * - Users can only access data under their own user ID.
+ * - Data validation is relaxed in this prototype to allow flexible data shapes, focusing on authorization.
+ * - Strong ownership validation on writes using path-based user ID matching.
+ * - The rules are designed to prevent unauthorized data access and modification.
+ * - Listing is allowed for owners in their subcollections
+ *
+ * Denormalization for Authorization:
+ * The data is nested within the user's document (`/users/{userId}`), which allows rules to be based on ownership without `get()` calls.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Checks if the current user is signed in.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * @description Checks if the provided userId matches the authenticated user's ID.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * @description Checks if the provided userId matches the authenticated user's ID, and the resource exists.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+
+    /**
+     * @description Enforces user-ownership for vehicle documents.
+     * @path /users/{userId}/vehicles/{vehicleId}
+     * @allow (create) User A creates a vehicle with ID 'vehicle123' under /users/A/vehicles/vehicle123
+     * @allow (get) User A reads their vehicle at /users/A/vehicles/vehicle123
+     * @allow (list) User A lists vehicles under /users/A/vehicles
+     * @allow (update) User A updates their vehicle at /users/A/vehicles/vehicle123
+     * @allow (delete) User A deletes their vehicle at /users/A/vehicles/vehicle123
+     * @deny (create) User B tries to create a vehicle under /users/A/vehicles/vehicle123
+     * @deny (get) User B tries to read vehicle under /users/A/vehicles/vehicle123
+     * @deny (update) User B tries to update vehicle under /users/A/vehicles/vehicle123
+     * @deny (delete) User B tries to delete vehicle under /users/A/vehicles/vehicle123
+     * @principle Enforces document ownership for writes.
+     */
+    match /users/{userId}/vehicles/{vehicleId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.id == vehicleId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Enforces user-ownership for service schedule documents.
+     * @path /users/{userId}/vehicles/{vehicleId}/serviceSchedules/{serviceScheduleId}
+     * @allow (create) User A creates a service schedule with ID 'schedule456' under /users/A/vehicles/vehicle123/serviceSchedules/schedule456
+     * @allow (get) User A reads their service schedule at /users/A/vehicles/vehicle123/serviceSchedules/schedule456
+     * @allow (list) User A lists service schedules under /users/A/vehicles/vehicle123/serviceSchedules
+     * @allow (update) User A updates their service schedule at /users/A/vehicles/vehicle123/serviceSchedules/schedule456
+     * @allow (delete) User A deletes their service schedule at /users/A/vehicles/vehicle123/serviceSchedules/schedule456
+     * @deny (create) User B tries to create a service schedule under /users/A/vehicles/vehicle123/serviceSchedules/schedule456
+     * @deny (get) User B tries to read service schedule under /users/A/vehicles/vehicle123/serviceSchedules/schedule456
+     * @deny (update) User B tries to update service schedule under /users/A/vehicles/vehicle123/serviceSchedules/schedule456
+     * @deny (delete) User B tries to delete service schedule under /users/A/vehicles/vehicle123/serviceSchedules/schedule456
+     * @principle Enforces document ownership for writes.
+     */
+    match /users/{userId}/vehicles/{vehicleId}/serviceSchedules/{serviceScheduleId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.id == serviceScheduleId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Enforces user-ownership for maintenance item documents.
+     * @path /users/{userId}/vehicles/{vehicleId}/serviceSchedules/{serviceScheduleId}/maintenanceItems/{maintenanceItemId}
+     * @allow (create) User A creates a maintenance item with ID 'item789' under /users/A/vehicles/vehicle123/serviceSchedules/schedule456/maintenanceItems/item789
+     * @allow (get) User A reads their maintenance item at /users/A/vehicles/vehicle123/serviceSchedules/schedule456/maintenanceItems/item789
+     * @allow (list) User A lists maintenance items under /users/A/vehicles/vehicle123/serviceSchedules/schedule456/maintenanceItems
+     * @allow (update) User A updates their maintenance item at /users/A/vehicles/vehicle123/serviceSchedules/schedule456/maintenanceItems/item789
+     * @allow (delete) User A deletes their maintenance item at /users/A/vehicles/vehicle123/serviceSchedules/schedule456/maintenanceItems/item789
+     * @deny (create) User B tries to create a maintenance item under /users/A/vehicles/vehicle123/serviceSchedules/schedule456/maintenanceItems/item789
+     * @deny (get) User B tries to read maintenance item under /users/A/vehicles/vehicle123/serviceSchedules/schedule456/maintenanceItems/item789
+     * @deny (update) User B tries to update maintenance item under /users/A/vehicles/vehicle123/serviceSchedules/schedule456/maintenanceItems/item789
+     * @deny (delete) User B tries to delete maintenance item under /users/A/vehicles/vehicle123/serviceSchedules/schedule456/maintenanceItems/item789
+     * @principle Enforces document ownership for writes.
+     */
+    match /users/{userId}/vehicles/{vehicleId}/serviceSchedules/{serviceScheduleId}/maintenanceItems/{maintenanceItemId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.id == maintenanceItemId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Enforces user-ownership for modification documents.
+     * @path /users/{userId}/vehicles/{vehicleId}/modifications/{modificationId}
+     * @allow (create) User A creates a modification with ID 'mod999' under /users/A/vehicles/vehicle123/modifications/mod999
+     * @allow (get) User A reads their modification at /users/A/vehicles/vehicle123/modifications/mod999
+     * @allow (list) User A lists modifications under /users/A/vehicles/vehicle123/modifications
+     * @allow (update) User A updates their modification at /users/A/vehicles/vehicle123/modifications/mod999
+     * @allow (delete) User A deletes their modification at /users/A/vehicles/vehicle123/modifications/mod999
+     * @deny (create) User B tries to create a modification under /users/A/vehicles/vehicle123/modifications/mod999
+     * @deny (get) User B tries to read modification under /users/A/vehicles/vehicle123/modifications/mod999
+     * @deny (update) User B tries to update modification under /users/A/vehicles/vehicle123/modifications/mod999
+     * @deny (delete) User B tries to delete modification under /users/A/vehicles/vehicle123/modifications/mod999
+     * @principle Enforces document ownership for writes.
+     */
+    match /users/{userId}/vehicles/{vehicleId}/modifications/{modificationId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.id == modificationId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(userId);
+    }
+  }
+}

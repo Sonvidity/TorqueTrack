@@ -1,44 +1,26 @@
 'use client';
 
-import {
-  useState,
-  useEffect,
-  type ReactNode,
-} from 'react';
-import { getApps, initializeApp, type FirebaseApp } from 'firebase/app';
-import { getAuth, type Auth } from 'firebase/auth';
-import { getFirestore, type Firestore } from 'firebase/firestore';
-import { FirebaseProvider } from './provider';
+import React, { useMemo, type ReactNode } from 'react';
+import { FirebaseProvider } from '@/firebase/provider';
+import { initializeFirebase } from '@/firebase';
 
-type FirebaseInstances = {
-  auth: Auth | null;
-  db: Firestore | null;
-  app: FirebaseApp | null;
-};
+interface FirebaseClientProviderProps {
+  children: ReactNode;
+}
 
-export function FirebaseClientProvider({ children }: { children: ReactNode }) {
-  const [instances, setInstances] = useState<FirebaseInstances>({
-    app: null,
-    auth: null,
-    db: null,
-  });
+export function FirebaseClientProvider({ children }: FirebaseClientProviderProps) {
+  const firebaseServices = useMemo(() => {
+    // Initialize Firebase on the client side, once per component mount.
+    return initializeFirebase();
+  }, []); // Empty dependency array ensures this runs only once on mount
 
-  useEffect(() => {
-    const firebaseConfigString = process.env.NEXT_PUBLIC_FIREBASE_CONFIG;
-    if (firebaseConfigString) {
-      try {
-        const firebaseConfig = JSON.parse(firebaseConfigString);
-        const apps = getApps();
-        const app =
-          apps.length > 0 ? apps[0] : initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        setInstances({ app, auth, db });
-      } catch (e) {
-        console.error("Failed to parse Firebase config:", e);
-      }
-    }
-  }, []);
-
-  return <FirebaseProvider instances={instances}>{children}</FirebaseProvider>;
+  return (
+    <FirebaseProvider
+      firebaseApp={firebaseServices.firebaseApp}
+      auth={firebaseServices.auth}
+      firestore={firebaseServices.firestore}
+    >
+      {children}
+    </FirebaseProvider>
+  );
 }

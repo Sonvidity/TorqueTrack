@@ -1,0 +1,256 @@
+{
+  "entities": {
+    "Vehicle": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Vehicle",
+      "type": "object",
+      "description": "Represents a vehicle with its year, make, model, and other relevant details.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Vehicle entity."
+        },
+        "year": {
+          "type": "number",
+          "description": "The year the vehicle was manufactured."
+        },
+        "make": {
+          "type": "string",
+          "description": "The make of the vehicle (e.g., Toyota, Honda)."
+        },
+        "model": {
+          "type": "string",
+          "description": "The model of the vehicle (e.g., GT86, Accord)."
+        },
+        "engineType": {
+          "type": "string",
+          "description": "The type of engine in the vehicle (e.g., FA20, LS1)."
+        }
+      },
+      "required": [
+        "id",
+        "year",
+        "make",
+        "model",
+        "engineType"
+      ]
+    },
+    "ServiceSchedule": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ServiceSchedule",
+      "type": "object",
+      "description": "Represents a service schedule for a specific vehicle.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ServiceSchedule entity."
+        },
+        "vehicleId": {
+          "type": "string",
+          "description": "Reference to Vehicle. (Relationship: Vehicle 1:N ServiceSchedule)"
+        },
+        "kms": {
+          "type": "number",
+          "description": "The current kilometers on the vehicle."
+        },
+        "lastServiceDate": {
+          "type": "string",
+          "description": "The date of the last service performed on the vehicle.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "vehicleId",
+        "kms",
+        "lastServiceDate"
+      ]
+    },
+    "MaintenanceItem": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "MaintenanceItem",
+      "type": "object",
+      "description": "Represents a specific maintenance item in a service schedule.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the MaintenanceItem entity."
+        },
+        "serviceScheduleId": {
+          "type": "string",
+          "description": "Reference to ServiceSchedule. (Relationship: ServiceSchedule 1:N MaintenanceItem)"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the maintenance item (e.g., Oil Change, Spark Plug Replacement)."
+        },
+        "intervalKms": {
+          "type": "number",
+          "description": "The recommended interval in kilometers for this maintenance item."
+        },
+        "intervalMonths": {
+          "type": "number",
+          "description": "The recommended interval in months for this maintenance item."
+        },
+        "stage": {
+          "type": "number",
+          "description": "The Stage of modification that the car has"
+        }
+      },
+      "required": [
+        "id",
+        "serviceScheduleId",
+        "description",
+        "intervalKms",
+        "intervalMonths"
+      ]
+    },
+    "Modification": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Modification",
+      "type": "object",
+      "description": "Represents a modification made to a vehicle.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Modification entity."
+        },
+        "vehicleId": {
+          "type": "string",
+          "description": "Reference to Vehicle. (Relationship: Vehicle 1:N Modification)"
+        },
+        "type": {
+          "type": "string",
+          "description": "The type of modification (e.g., Turbo, Supercharger, Engine Swap)."
+        },
+        "details": {
+          "type": "string",
+          "description": "Specific details about the modification (e.g., Turbo model, Supercharger kit, Engine type)."
+        },
+        "chassisKms": {
+          "type": "number",
+          "description": "The KMS on the chassis"
+        },
+        "engineKms": {
+          "type": "number",
+          "description": "The KMS on the engine"
+        }
+      },
+      "required": [
+        "id",
+        "vehicleId",
+        "type",
+        "details",
+        "chassisKms",
+        "engineKms"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}/vehicles/{vehicleId}",
+        "definition": {
+          "entityName": "Vehicle",
+          "schema": {
+            "$ref": "#/backend/entities/Vehicle"
+          },
+          "description": "Stores vehicle information. Path-based ownership enforced via /users/{userId}. Provides user-specific context.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The ID of the user who owns the vehicle."
+            },
+            {
+              "name": "vehicleId",
+              "description": "The unique ID of the vehicle."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/vehicles/{vehicleId}/serviceSchedules/{serviceScheduleId}",
+        "definition": {
+          "entityName": "ServiceSchedule",
+          "schema": {
+            "$ref": "#/backend/entities/ServiceSchedule"
+          },
+          "description": "Stores service schedules for a specific vehicle.  Path-based ownership enforced via /users/{userId}/vehicles/{vehicleId}. Provides user-specific and vehicle-specific context.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The ID of the user who owns the vehicle."
+            },
+            {
+              "name": "vehicleId",
+              "description": "The ID of the vehicle associated with this service schedule."
+            },
+            {
+              "name": "serviceScheduleId",
+              "description": "The unique ID of the service schedule."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/vehicles/{vehicleId}/serviceSchedules/{serviceScheduleId}/maintenanceItems/{maintenanceItemId}",
+        "definition": {
+          "entityName": "MaintenanceItem",
+          "schema": {
+            "$ref": "#/backend/entities/MaintenanceItem"
+          },
+          "description": "Stores maintenance items for a specific service schedule. Path-based ownership enforced via /users/{userId}/vehicles/{vehicleId}/serviceSchedules/{serviceScheduleId}. Provides user-specific, vehicle-specific and service-schedule-specific context.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The ID of the user who owns the vehicle."
+            },
+            {
+              "name": "vehicleId",
+              "description": "The ID of the vehicle associated with this service schedule."
+            },
+            {
+              "name": "serviceScheduleId",
+              "description": "The ID of the service schedule."
+            },
+            {
+              "name": "maintenanceItemId",
+              "description": "The unique ID of the maintenance item."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/vehicles/{vehicleId}/modifications/{modificationId}",
+        "definition": {
+          "entityName": "Modification",
+          "schema": {
+            "$ref": "#/backend/entities/Modification"
+          },
+          "description": "Stores modifications for a specific vehicle. Path-based ownership enforced via /users/{userId}/vehicles/{vehicleId}. Provides user-specific and vehicle-specific context.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The ID of the user who owns the vehicle."
+            },
+            {
+              "name": "vehicleId",
+              "description": "The ID of the vehicle associated with this modification."
+            },
+            {
+              "name": "modificationId",
+              "description": "The unique ID of the modification."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore data structure is designed to support the TorqueTrack application's features, focusing on vehicle maintenance scheduling and modification tracking. The structure prioritizes authorization independence and efficient data retrieval.  Each Vehicle has a subcollection for ServiceSchedules and Modifications. This hierarchical structure allows for easy querying of service schedules and modifications for a specific vehicle.  The 'MaintenanceItems' are nested within 'ServiceSchedule' making it easier to access and manage what's due. Path-based ownership (`/users/{userId}/vehicles/{vehicleId}`) provides secure and scalable authorization. Since no collaborative features are listed, this design focuses on individual user ownership of vehicle data.\n\n**Authorization Independence:** Authorization independence is achieved because the application focuses on user-owned data. All collections are nested within the user's document (`/users/{userId}`), which implies that only the authenticated user (`request.auth.uid == userId`) can access the data. There are no `get()` calls required to retrieve parent data since all rules are based on ownership.\n\n**QAPs (Rules are not Filters):** The segregation of vehicle data by user (`/users/{userId}/vehicles/{vehicleId}`) inherently supports secure `list` operations. A user can only list the vehicles and associated data they own. The structure does not require filtering based on data content within the rules."
+  }
+}
