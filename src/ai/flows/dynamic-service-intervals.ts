@@ -131,12 +131,12 @@ const prompt = ai.definePrompt({
       *   Engine items: Engine Oil & Filter, Spark Plugs, Air Filter, Coolant, Transmission Fluid, Differential Fluid, Timing Belt.
       *   Chassis items: Tire Rotation, Brake Fluid, Cabin Air Filter.
   2.  **Determine Current Mileage for Calculation**:
-      *   If the item is an 'engine' item AND the engine has been swapped (\`hasSwappedEngine\` is true), use the current \`engineKms\`.
-      *   Otherwise (for all chassis items, and for engine items on an original engine), use the current chassis \`kms\`.
+      *   For 'engine' items, use the current \`engineKms\`.
+      *   For 'chassis' items, use the current \`chassisKms\` (which is the same as \`kms\`).
   3.  **Determine Last Service Mileage for the Item**:
-      *   If the item's name is in \`lastServiceItems\`, the last service mileage is \`lastServiceKms\`. Use this value regardless of component type. This is the most recent service record.
-      *   If the item was NOT in \`lastServiceItems\` BUT it is an 'engine' item and a swap occurred with \`engineSwapKms\` data, its last service point is effectively the \`engineKmsAtSwap\`.
-      *   If neither of the above apply, assume the item has never been serviced (last service is 0 km).
+      *   **If the item was serviced recently**: If the item's name appears in \`lastServiceItems\`, its last service point is \`lastServiceKms\`. This applies to BOTH engine and chassis parts.
+      *   **If the item was NOT serviced recently, BUT it's an ENGINE part on a SWAPPED engine**: Its last effective service was when the engine was put in. The mileage at that point was \`engineKmsAtSwap\`.
+      *   **If neither of the above apply**: Assume the item has never been serviced. The last service mileage is 0 km.
   4.  **Calculate Mileage Since Last Service**:
       *   \`kmsSinceService\` = ('Current Mileage for Calculation' from Step 2) - ('Last Service Mileage for the Item' from Step 3).
   5.  **Check if Due**:

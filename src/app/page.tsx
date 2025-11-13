@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/carousel";
 import { MainNav } from '@/app/components/main-nav';
 import { Lightbulb, Wrench, Rocket } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 function Header() {
   return (

@@ -101,6 +101,8 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
       engineSwap: "stock",
       lastServiceKms: 166000,
       lastServiceItems: "Oil Change, Oil Filter",
+      engineSwapKms: 110000,
+      engineKmsAtSwap: 60000,
     },
   });
 
@@ -271,9 +273,9 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
                      <div className="space-y-6 p-4 border rounded-md bg-muted/50 animate-in fade-in-50">
                         <FormField control={form.control} name="engineKms" render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Engine KMs</FormLabel>
+                            <FormLabel>Current Engine KMs</FormLabel>
                             <FormControl><Input type="number" placeholder="e.g., 50000" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : e.target.valueAsNumber)} /></FormControl>
-                            <FormDescription>KMs on the replacement engine.</FormDescription><FormMessage />
+                            <FormDescription>Total KMs on the replacement engine itself.</FormDescription><FormMessage />
                           </FormItem>
                         )} />
                      </div>
@@ -328,26 +330,7 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
                       </FormItem>
                     )} />
                   </div>
-                  {hasSwappedEngine && engineSwap !== 'stock' && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 border rounded-md bg-muted/50 animate-in fade-in-50">
-                       <FormField control={form.control} name="engineSwapKms" render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Chassis KMs at Swap</FormLabel>
-                          <FormControl><Input type="number" placeholder="e.g., 120000" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : e.target.valueAsNumber)} /></FormControl>
-                          <FormDescription>KMs on the car when the new engine was installed.</FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )} />
-                       <FormField control={form.control} name="engineKmsAtSwap" render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Engine KMs at Swap</FormLabel>
-                          <FormControl><Input type="number" placeholder="e.g., 76000" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : e.target.valueAsNumber)} /></FormControl>
-                          <FormDescription>KMs on the replacement engine when it was installed.</FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )} />
-                    </div>
-                  )}
+                  
                    <FormField control={form.control} name="forcedInduction" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Forced Induction</FormLabel>
@@ -384,6 +367,26 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
                 </TabsContent>
 
                 <TabsContent value="history" className="space-y-6">
+                  {hasSwappedEngine && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 border rounded-md bg-muted/50">
+                       <FormField control={form.control} name="engineSwapKms" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Chassis KMs at Swap</FormLabel>
+                          <FormControl><Input type="number" placeholder="e.g., 120000" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : e.target.valueAsNumber)} /></FormControl>
+                          <FormDescription>KMs on the car when the new engine was installed.</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                       <FormField control={form.control} name="engineKmsAtSwap" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Engine KMs at Swap</FormLabel>
+                          <FormControl><Input type="number" placeholder="e.g., 76000" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : e.target.valueAsNumber)} /></FormControl>
+                          <FormDescription>KMs on the replacement engine when it was installed.</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                    </div>
+                  )}
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <FormField control={form.control} name="lastServiceKms" render={({ field }) => (
                         <FormItem>

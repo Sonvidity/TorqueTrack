@@ -25,6 +25,14 @@ export const formSchema = z.object({
 }, {
     message: "Engine KMs are required when engine is swapped.",
     path: ["engineKms"],
+}).refine(data => {
+    if (data.hasSwappedEngine) {
+        return data.engineSwapKms !== undefined && data.engineKmsAtSwap !== undefined;
+    }
+    return true;
+}, {
+    message: "Engine swap KMs and engine KMs at swap are required when engine is swapped.",
+    path: ["engineSwapKms"],
 });
 
 export type FormValues = z.infer<typeof formSchema>;
