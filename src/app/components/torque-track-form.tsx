@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
 import { getServiceScheduleAction, saveVehicleAction, type ActionResponse } from "@/app/actions";
-import { formSchema } from "@/lib/schema";
+import { formSchema, type FormValues } from "@/lib/schema";
 import { vehicles, commonEngineSwaps } from "@/lib/vehicles";
 import { useUser } from "@/firebase/index";
 import { useToast } from "@/hooks/use-toast";
@@ -79,6 +79,7 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [result, setResult] = useState<ActionResponse | null>(null);
+  const [formValues, setFormValues] = useState<FormValues | null>(null);
   const { user } = useUser();
   const { toast } = useToast();
   const router = useRouter();
@@ -133,6 +134,7 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     setResult(null);
+    setFormValues(values);
     const actionResult = await getServiceScheduleAction(values);
     setResult(actionResult);
     setIsLoading(false);
@@ -405,7 +407,7 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
         </CardContent>
       </Card>
       {isLoading && <LoadingIndicator />}
-      <ServiceSchedule result={result} />
+      <ServiceSchedule result={result} formValues={formValues!} />
     </div>
   );
 }

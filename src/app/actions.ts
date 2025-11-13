@@ -47,11 +47,18 @@ export async function saveVehicleAction(userId: string, values: FormValues): Pro
     }
 
     const vehicleId = nanoid();
+    
+    // Calculate engineKms before saving
+    let currentEngineKms = validatedFields.data.chassisKms;
+    if (validatedFields.data.hasSwappedEngine && validatedFields.data.engineSwapKms && validatedFields.data.engineKmsAtSwap) {
+      currentEngineKms = (validatedFields.data.chassisKms - validatedFields.data.engineSwapKms) + validatedFields.data.engineKmsAtSwap;
+    }
+
     const vehicleData = {
         ...validatedFields.data,
         id: vehicleId,
         userId: userId,
-        engineKms: mapFormToAIInput(validatedFields.data).engineKms,
+        engineKms: currentEngineKms, // Save the calculated engine KMs
     }
 
     try {
@@ -70,31 +77,18 @@ function mapFormToAIInput(data: FormValues): DynamicServiceIntervalsInput {
         make,
         model,
         year,
-        chassisKms,
-        hasSwappedEngine,
         drivingHabits,
         stage,
         forcedInduction,
         turboType,
         superchargerKit,
         engineSwap,
-        engineSwapKms,
-        engineKmsAtSwap,
-        lastServiceKms,
-        lastServiceItems,
       } = data;
 
-      let currentEngineKms = chassisKms;
-      if (hasSwappedEngine && engineSwapKms && engineKmsAtSwap) {
-        currentEngineKms = (chassisKms - engineSwapKms) + engineKmsAtSwap;
-      }
-      
       return {
         year: year.toString(),
         make,
         model,
-        kms: chassisKms,
-        hasSwappedEngine,
         drivingHabits,
         modifications: {
             ...(stage !== 'none' && { stage }),
@@ -102,11 +96,5 @@ function mapFormToAIInput(data: FormValues): DynamicServiceIntervalsInput {
             ...(forcedInduction === 'supercharger' && { supercharger: superchargerKit }),
             ...(engineSwap !== 'stock' && { engineSwap }),
         },
-        engineKms: currentEngineKms,
-        chassisKms,
-        ...(engineSwapKms && engineSwapKms > 0 && { engineSwapKms }),
-        ...(engineKmsAtSwap && engineKmsAtSwap > 0 && { engineKmsAtSwap }),
-        ...(lastServiceKms && lastServiceKms > 0 && { lastServiceKms }),
-        ...(lastServiceItems && { lastServiceItems }),
       };
 }
