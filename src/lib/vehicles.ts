@@ -92,11 +92,15 @@ export const vehicles: Vehicle[] = [
   {
     make: "Ford",
     models: [
+        { name: "Falcon (AU)", years: Array.from({ length: 2002 - 1998 + 1 }, (_, i) => 1998 + i), engine: "Intech VCT" },
         { name: "Falcon (BA)", years: [2002, 2003, 2004, 2005], engine: "Barra 182/240T" },
         { name: "Falcon (BF)", years: [2005, 2006, 2007, 2008], engine: "Barra 190/245T" },
         { name: "Falcon (FG)", years: [2008, 2009, 2010, 2011, 2012, 2013, 2014], engine: "Barra 195/270T / Coyote V8" },
         { name: "Falcon (FG X)", years: [2014, 2015, 2016], engine: "Barra 195/270T / Coyote V8" },
-        { name: "Mustang (S550)", years: Array.from({ length: 2023 - 2015 + 1 }, (_, i) => 2015 + i), engine: "EcoBoost / Coyote V8" },
+        { name: "Mustang (SN95)", years: Array.from({ length: 2004 - 1995 + 1 }, (_, i) => 1995 + i), engine: "Windsor V8 / Modular V8" },
+        { name: "Mustang (S197)", years: Array.from({ length: 2014 - 2005 + 1 }, (_, i) => 2005 + i), engine: "Modular V8 / Coyote V8" },
+        { name: "Mustang (S550)", years: Array.from({ length: 2023 - 2015 + 1 }, (_, i) => 2015 + i), engine: "2.3L EcoBoost / 5.0L Coyote V8" },
+        { name: "Mustang (S650)", years: Array.from({ length: 2025 - 2024 + 1 }, (_, i) => 2024 + i), engine: "2.3L EcoBoost / 5.0L Coyote V8" },
         { name: "Ranger (T6)", years: Array.from({ length: 2022 - 2011 + 1 }, (_, i) => 2011 + i), engine: "Duratorq / EcoBlue" },
         { name: "Focus (ST/RS)", years: Array.from({ length: 2018 - 2012 + 1 }, (_, i) => 2012 + i), engine: "2.0L EcoBoost / 2.3L EcoBoost" },
     ],
@@ -104,7 +108,11 @@ export const vehicles: Vehicle[] = [
   {
     make: "Holden",
     models: [
-      { name: "Commodore (VY/VZ)", years: Array.from({ length: 2007 - 2002 + 1 }, (_, i) => 2002 + i), engine: "Alloytec V6 / LS1 V8" },
+      { name: "Commodore (VS)", years: Array.from({ length: 1997 - 1995 + 1 }, (_, i) => 1995 + i), engine: "Ecotec V6 / 5.0L V8" },
+      { name: "Commodore (VT)", years: Array.from({ length: 2000 - 1997 + 1 }, (_, i) => 1997 + i), engine: "Ecotec V6 / LS1 V8" },
+      { name: "Commodore (VX)", years: Array.from({ length: 2002 - 2000 + 1 }, (_, i) => 2000 + i), engine: "Ecotec V6 / LS1 V8" },
+      { name: "Commodore (VY)", years: Array.from({ length: 2004 - 2002 + 1 }, (_, i) => 2002 + i), engine: "Ecotec V6 / Alloytec V6 / LS1 V8" },
+      { name: "Commodore (VZ)", years: Array.from({ length: 2007 - 2004 + 1 }, (_, i) => 2004 + i), engine: "Alloytec V6 / LS1 V8 / L76 V8" },
       { name: "Commodore (VE)", years: Array.from({ length: 2013 - 2006 + 1 }, (_, i) => 2006 + i), engine: "Alloytec/SIDI V6 / L76/L98/LS2/LS3 V8" },
       { name: "Commodore (VF)", years: Array.from({ length: 2017 - 2013 + 1 }, (_, i) => 2013 + i), engine: "SIDI V6 / L77/LS3 V8" },
       { name: "Monaro", years: Array.from({ length: 2006 - 2001 + 1 }, (_, i) => 2001 + i), engine: "LS1 V8" },
