@@ -371,7 +371,10 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
                     <FormField control={form.control} name="lastServiceKms" render={({ field }) => (
                         <FormItem>
                           <FormLabel>KMs at Last Service</FormLabel>
-                          <FormControl><Input type="number" placeholder="e.g., 75000" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))} /></FormControl>
+                          <FormControl><Input type="number" placeholder="e.g., 75000" {...field} onChange={e => {
+                            const value = e.target.value;
+                            field.onChange(value === '' ? undefined : parseInt(value, 10));
+                          }} /></FormControl>
                           <FormDescription>Odometer reading at your last service.</FormDescription>
                           <FormMessage />
                         </FormItem>

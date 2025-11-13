@@ -67,15 +67,19 @@ export function ServiceScheduleDisplay({ schedule, formValues }: ServiceSchedule
             lastServicePoint = lastServiceKms;
         }
     } 
-    // Rule 2: If not, was there a general service performed?
+    // Rule 2: If not, was there a general service performed? (Use last service kms as the baseline)
     else if (lastServiceKms) {
          if (isEngineItem) {
             if(hasSwappedEngine && engineSwapKms && engineKmsAtSwap && lastServiceKms > engineSwapKms) {
+                // Engine was swapped before this service, so we need to calculate the engine's KMs at the time of the service
                 lastServicePoint = (lastServiceKms - engineSwapKms) + engineKmsAtSwap;
             } else {
+                // Engine wasn't swapped, or was swapped *after* this service.
+                // Or there is no swap history. So the KMs are linear.
                 lastServicePoint = lastServiceKms;
             }
         } else {
+            // For chassis items, it's always the direct service KMs
             lastServicePoint = lastServiceKms;
         }
     }
