@@ -122,17 +122,24 @@ const prompt = ai.definePrompt({
   - Items serviced: {{{lastServiceItems}}}
   {{/if}}
 
-  Based on ALL this information, provide a service schedule. 
-  For each item, you MUST determine if the service is currently due. To do this, you must consider the correct base mileage. 
+  Based on ALL this information, provide a service schedule. For each item, you MUST determine if the service is currently due.
   
   Here is the logic for determining if an item is due:
-  1. Determine the 'baseKms' for the item. For chassis items (brakes, suspension, tires, cabin air filter), use 'chassisKms'. For engine-specific items (oil, spark plugs, belts, air filter, coolant, transmission fluid, differential fluid), use the 'engineKms'.
-  2. Determine the 'lastServicedAtKms'. 
-     - If the 'item' is listed in 'lastServiceItems', then 'lastServicedAtKms' is the 'lastServiceKms' value.
-     - If the item is NOT in 'lastServiceItems' AND an engine swap occurred, the 'lastServicedAtKms' for engine items is effectively the 'engineKmsAtSwap' value (or 0 if not provided), because a full service is assumed at swap time. The KMs on the chassis at the time of the swap was 'engineSwapKms'. The effective service point in the car's life is 'engineSwapKms'.
-     - Otherwise, 'lastServicedAtKms' is 0.
-  3. Calculate KMs since last service: 'kmsSinceService' = 'baseKms' - 'lastServicedAtKms'.
-  4. Check if due: 'isDue' is true if 'kmsSinceService' is greater than or equal to the item's 'intervalKms'.
+  1.  **Identify Component Type**: Determine if the service item is related to the 'engine' or the 'chassis'.
+      *   Engine items: Engine Oil & Filter, Spark Plugs, Air Filter, Coolant, Transmission Fluid, Differential Fluid, Timing Belt.
+      *   Chassis items: Tire Rotation, Brake Fluid, Cabin Air Filter.
+  2.  **Determine Current Mileage**:
+      *   For 'engine' items, use the current \`engineKms\`.
+      *   For 'chassis' items, use the current \`chassisKms\` (which is the same as \`kms\`).
+  3.  **Determine Last Service Mileage for the Item**:
+      *   **If the item was serviced recently**: If the item's name appears in \`lastServiceItems\`, its last service point is \`lastServiceKms\`. This applies to BOTH engine and chassis parts.
+      *   **If the item was NOT serviced recently AND an engine swap occurred**: For 'engine' items ONLY, assume they were serviced at the time of the swap. The effective mileage at which the service happened is \`engineKmsAtSwap\`. The 'current mileage' to compare against is the \`engineKms\`.
+      *   **If neither of the above**: Assume the item has never been serviced. Its last service point is 0 km.
+  4.  **Calculate Mileage Since Last Service**:
+      *   \`kmsSinceService\` = (\`Current Mileage\` from Step 2) - (\`Last Service Mileage\` from Step 3).
+  5.  **Check if Due**:
+      *   \`isDue\` is **true** if \`kmsSinceService\` is greater than or equal to the item's recommended \`intervalKms\`.
+      *   \`isDue\` is **false** otherwise.
 
   Set the 'isDue' flag to true if the service is due, and false otherwise. Explain the reasoning behind each adjustment.
 
@@ -152,6 +159,10 @@ const dynamicServiceIntervalsFlow = ai.defineFlow(
     outputSchema: DynamicServiceIntervalsOutputSchema,
   },
   async input => {
+    // If engineKms is not provided or is 0, set it to chassisKms for the AI.
+    if (!input.engineKms) {
+      input.engineKms = input.kms;
+    }
     const {output} = await prompt(input);
     return output!;
   }
