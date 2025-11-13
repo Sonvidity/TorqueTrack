@@ -2,14 +2,13 @@
 'use client';
 
 import { useSignInWithGoogle } from 'react-firebase-hooks/auth';
-import { useAuth } from '@/firebase/provider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Logo } from '@/app/components/icons/logo';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { useUser } from '@/firebase/auth/use-user';
 import { Chrome } from 'lucide-react';
+import { useAuth, useUser } from '@/firebase';
 
 export default function LoginPage() {
   const auth = useAuth();

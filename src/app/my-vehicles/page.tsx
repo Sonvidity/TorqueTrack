@@ -1,13 +1,13 @@
 
 'use client';
 
-import { useUser } from '@/firebase/auth/use-user';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { MainNav } from '@/app/components/main-nav';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { useUser } from '@/firebase';
 
 function Header() {
   return (
