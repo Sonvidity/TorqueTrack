@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useSignInWithGoogle } from 'react-firebase-hooks/auth';
@@ -8,7 +7,7 @@ import { Logo } from '@/app/components/icons/logo';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Chrome } from 'lucide-react';
-import { useAuth, useUser } from '@/firebase';
+import { useAuth, useUser } from '@/firebase/index';
 
 export default function LoginPage() {
   const auth = useAuth();
