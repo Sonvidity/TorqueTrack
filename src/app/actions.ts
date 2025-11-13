@@ -51,6 +51,7 @@ export async function saveVehicleAction(userId: string, values: FormValues): Pro
         ...validatedFields.data,
         id: vehicleId,
         userId: userId,
+        engineKms: mapFormToAIInput(validatedFields.data).engineKms,
     }
 
     try {
@@ -83,13 +84,11 @@ function mapFormToAIInput(data: FormValues): DynamicServiceIntervalsInput {
         lastServiceItems,
       } = data;
 
-      let currentEngineKms = data.engineKms;
+      let currentEngineKms = chassisKms;
       if (hasSwappedEngine && engineSwapKms && engineKmsAtSwap) {
         currentEngineKms = (chassisKms - engineSwapKms) + engineKmsAtSwap;
-      } else {
-        currentEngineKms = chassisKms;
       }
-
+      
       return {
         year: year.toString(),
         make,
