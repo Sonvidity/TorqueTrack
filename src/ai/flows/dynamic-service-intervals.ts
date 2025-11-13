@@ -90,7 +90,7 @@ const prompt = ai.definePrompt({
   - Chassis Kilometers: {{{kms}}}
   - Engine Swapped: {{{hasSwappedEngine}}}
   {{#if hasSwappedEngine}}
-  - Current Engine KMS: {{{engineKms}}}
+  - Current Engine KMS (Calculated): {{{engineKms}}}
   {{/if}}
   
   {{#if modifications}}
@@ -134,7 +134,7 @@ const prompt = ai.definePrompt({
       *   For 'engine' items, use the current \`engineKms\`.
       *   For 'chassis' items, use the current \`chassisKms\` (which is the same as \`kms\`).
   3.  **Determine Last Service Mileage for the Item**:
-      *   **If the item was serviced recently**: If the item's name appears in \`lastServiceItems\`, its last service point is \`lastServiceKms\`. This applies to BOTH engine and chassis parts.
+      *   **If the item was serviced recently**: If the item's name appears in \`lastServiceItems\`, its last service point is based on the mileage of the relevant component at that time. If it is an engine part, the last service was at the \`engineKms\` that corresponds to the chassis's \`lastServiceKms\`. If it is a chassis part, the last service was at \`lastServiceKms\`.
       *   **If the item was NOT serviced recently, BUT it's an ENGINE part on a SWAPPED engine**: Its last effective service was when the engine was put in. The mileage at that point was \`engineKmsAtSwap\`.
       *   **If neither of the above apply**: Assume the item has never been serviced. The last service mileage is 0 km.
   4.  **Calculate Mileage Since Last Service**:
@@ -159,7 +159,10 @@ const dynamicServiceIntervalsFlow = ai.defineFlow(
     // If engine is not swapped, ensure AI knows engineKms is same as chassisKms.
     if (!input.hasSwappedEngine) {
       input.engineKms = input.kms;
+    } else if (input.engineSwapKms && input.engineKmsAtSwap) {
+        input.engineKms = (input.kms - input.engineSwapKms) + input.engineKmsAtSwap;
     }
+
     const {output} = await prompt(input);
     return output!;
   }

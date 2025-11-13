@@ -71,7 +71,6 @@ function mapFormToAIInput(data: FormValues): DynamicServiceIntervalsInput {
         year,
         chassisKms,
         hasSwappedEngine,
-        engineKms,
         drivingHabits,
         stage,
         forcedInduction,
@@ -83,6 +82,13 @@ function mapFormToAIInput(data: FormValues): DynamicServiceIntervalsInput {
         lastServiceKms,
         lastServiceItems,
       } = data;
+
+      let currentEngineKms = data.engineKms;
+      if (hasSwappedEngine && engineSwapKms && engineKmsAtSwap) {
+        currentEngineKms = (chassisKms - engineSwapKms) + engineKmsAtSwap;
+      } else {
+        currentEngineKms = chassisKms;
+      }
 
       return {
         year: year.toString(),
@@ -97,8 +103,8 @@ function mapFormToAIInput(data: FormValues): DynamicServiceIntervalsInput {
             ...(forcedInduction === 'supercharger' && { supercharger: superchargerKit }),
             ...(engineSwap !== 'stock' && { engineSwap }),
         },
-        ...(engineKms && engineKms > 0 && { engineKms }),
-        ...(chassisKms > 0 && { chassisKms }),
+        engineKms: currentEngineKms,
+        chassisKms,
         ...(engineSwapKms && engineSwapKms > 0 && { engineSwapKms }),
         ...(engineKmsAtSwap && engineKmsAtSwap > 0 && { engineKmsAtSwap }),
         ...(lastServiceKms && lastServiceKms > 0 && { lastServiceKms }),

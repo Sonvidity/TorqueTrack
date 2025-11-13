@@ -92,7 +92,6 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
       year: 2012,
       chassisKms: 170325,
       hasSwappedEngine: true,
-      engineKms: 124325,
       drivingHabits: "Spirited Weekend Drives",
       stage: "none",
       forcedInduction: "none",
@@ -134,13 +133,7 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     setResult(null);
-    // If engine is not swapped, set engineKms to chassisKms before submitting
-    const submissionValues = { ...values };
-    if (!submissionValues.hasSwappedEngine) {
-      submissionValues.engineKms = submissionValues.chassisKms;
-    }
-
-    const actionResult = await getServiceScheduleAction(submissionValues);
+    const actionResult = await getServiceScheduleAction(values);
     setResult(actionResult);
     setIsLoading(false);
   }
@@ -157,12 +150,7 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
     
     setIsSaving(true);
     const values = form.getValues();
-     const submissionValues = { ...values };
-    if (!submissionValues.hasSwappedEngine) {
-      submissionValues.engineKms = submissionValues.chassisKms;
-    }
-
-    const result = await saveVehicleAction(user.uid, submissionValues);
+    const result = await saveVehicleAction(user.uid, values);
 
     if (result.success) {
       toast({
@@ -269,17 +257,7 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
                       </FormItem>
                     )}
                   />
-                  {hasSwappedEngine && (
-                     <div className="space-y-6 p-4 border rounded-md bg-muted/50 animate-in fade-in-50">
-                        <FormField control={form.control} name="engineKms" render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Current Engine KMs</FormLabel>
-                            <FormControl><Input type="number" placeholder="e.g., 50000" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : e.target.valueAsNumber)} /></FormControl>
-                            <FormDescription>Total KMs on the replacement engine itself.</FormDescription><FormMessage />
-                          </FormItem>
-                        )} />
-                     </div>
-                  )}
+                  
                   <FormField control={form.control} name="drivingHabits" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Primary Driving Style</FormLabel>
