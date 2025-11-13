@@ -16,7 +16,7 @@ type ServiceItem = {
   item: string;
   intervalKms: number;
   intervalMonths: number;
-  reason: string;
+  reason?: string;
 };
 
 type ServiceScheduleDisplayProps = {
@@ -128,7 +128,7 @@ export function ServiceScheduleDisplay({ schedule, formValues }: ServiceSchedule
             </div>
           </AccordionTrigger>
           <AccordionContent className="pl-12 pb-4">
-             <p className="text-muted-foreground">{item.reason}</p>
+             <p className="text-muted-foreground">{item.reason || 'Standard interval.'}</p>
              <p className="text-xs text-muted-foreground/80 mt-2">
                 ~{Math.max(0, item.kmsSinceLastService).toLocaleString()} km since last service.
              </p>
