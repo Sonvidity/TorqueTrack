@@ -11,7 +11,6 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { getStandardServiceIntervals } from '@/ai/tools/service-data-tool';
 
 const DynamicServiceIntervalsInputSchema = z.object({
   year: z.string().describe('The year of the vehicle.'),
@@ -37,6 +36,11 @@ const DynamicServiceIntervalsInputSchema = z.object({
     .describe(
       'Description of the ariving habits, e.g., daily driving, track days, driven hard.'
     ),
+  standardIntervals: z.array(z.object({
+    item: z.string(),
+    intervalKms: z.number(),
+    intervalMonths: z.number(),
+  })).describe('The standard manufacturer-recommended service intervals.'),
 });
 
 export type DynamicServiceIntervalsInput = z.infer<
@@ -68,22 +72,28 @@ const prompt = ai.definePrompt({
   name: 'dynamicServiceIntervalsPrompt',
   input: {schema: DynamicServiceIntervalsInputSchema},
   output: {schema: DynamicServiceIntervalsOutputSchema},
-  tools: [getStandardServiceIntervals],
   prompt: `You are an expert mechanic who provides dynamic service intervals based on vehicle information, modifications, and driving habits.
 
-  Your task is to generate a service schedule by following these steps:
-  1.  **Get Baseline**: Use the 'getStandardServiceIntervals' tool to fetch the manufacturer-recommended service intervals for the specified vehicle.
-  2.  **Adjust for Mods & Habits**: Review the vehicle's modifications and driving habits. For any high-stress modifications (turbo, supercharger, stage 2+) or aggressive driving habits ('Regular Track/Race Use'), significantly reduce the service intervals for related components (e.g., Engine Oil, Spark Plugs, Transmission Fluid). For example, a turbo car driven hard might need oil changes every 5,000 km instead of 10,000 km.
-  3.  **Provide Reasoning**: For each adjustment you make, provide a clear and concise reason in the 'reason' field. If no adjustment is needed, state that it's the standard recommended interval.
+  Your task is to take the provided 'standardIntervals' and adjust them based on the vehicle's modifications and driving habits.
 
-  Vehicle Information:
+  **Adjustment Rules**:
+  1.  **Review Mods & Habits**: For any high-stress modifications (turbo, supercharger, stage 2+) or aggressive driving habits ('Regular Track/Race Use'), significantly reduce the service intervals for related components (e.g., Engine Oil, Spark Plugs, Transmission Fluid). For example, a turbo car driven hard might need oil changes every 5,000 km instead of 10,000 km.
+  2.  **Provide Reasoning**: For each service item, provide a clear and concise reason for the adjusted interval in the 'reason' field. If no adjustment is needed, state that it's the standard recommended interval.
+  3.  **Return the Full List**: Ensure you return all items from the original \`standardIntervals\` list, with their adjusted values.
+
+  **Vehicle Information**:
   - Year: {{{year}}}, Make: {{{make}}}, Model: {{{model}}}
   - Driving Habits: {{{drivingHabits}}}
   {{#if modifications}}
   - Modifications: {{#if modifications.stage}}Stage {{{modifications.stage}}}{{/if}}, {{#if modifications.turbo}}{{{modifications.turbo}}}{{/if}}{{#if modifications.supercharger}}{{{modifications.supercharger}}}{{/if}}{{#if modifications.engineSwap}}Swapped to {{{modifications.engineSwap}}}{{/if}}
   {{/if}}
 
-  Produce a valid JSON output for the 'serviceSchedule'. Do NOT determine if the service is due. Only return the adjusted intervals.
+  **Standard Intervals to Adjust**:
+  {{#each standardIntervals}}
+  - {{item}}: {{intervalKms}} km / {{intervalMonths}} months
+  {{/each}}
+  
+  Produce a valid JSON output for the 'serviceSchedule'.
   `,
 });
 

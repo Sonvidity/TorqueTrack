@@ -1,6 +1,6 @@
+
 'use server';
 
-import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
 // Simplified database of standard service intervals
@@ -47,29 +47,23 @@ const GetStandardServiceIntervalsOutputSchema = z.object({
   ),
 });
 
-export const getStandardServiceIntervals = ai.defineTool(
-  {
-    name: 'getStandardServiceIntervals',
-    description: 'Returns the standard manufacturer service intervals for a given vehicle. This should be the first step before making any adjustments.',
-    inputSchema: GetStandardServiceIntervalsInputSchema,
-    outputSchema: GetStandardServiceIntervalsOutputSchema,
-  },
-  async (input) => {
-    const key = `${input.make}-${input.model}`;
-    const vehicleSpecificIntervals = (serviceIntervalData as any)[key] || [];
-    const defaultIntervals = serviceIntervalData.default;
+export async function getStandardServiceIntervals(
+  input: z.infer<typeof GetStandardServiceIntervalsInputSchema>
+): Promise<z.infer<typeof GetStandardServiceIntervalsOutputSchema>> {
+  const key = `${input.make}-${input.model}`;
+  const vehicleSpecificIntervals = (serviceIntervalData as any)[key] || [];
+  const defaultIntervals = serviceIntervalData.default;
 
-    // Merge vehicle-specific intervals with defaults, overwriting defaults if specific ones exist.
-    const finalIntervals = [...defaultIntervals];
-    vehicleSpecificIntervals.forEach((specific: any) => {
-      const existingIndex = finalIntervals.findIndex(d => d.item === specific.item);
-      if (existingIndex > -1) {
-        finalIntervals[existingIndex] = specific;
-      } else {
-        finalIntervals.push(specific);
-      }
-    });
+  // Merge vehicle-specific intervals with defaults, overwriting defaults if specific ones exist.
+  const finalIntervals = [...defaultIntervals];
+  vehicleSpecificIntervals.forEach((specific: any) => {
+    const existingIndex = finalIntervals.findIndex(d => d.item === specific.item);
+    if (existingIndex > -1) {
+      finalIntervals[existingIndex] = specific;
+    } else {
+      finalIntervals.push(specific);
+    }
+  });
 
-    return { intervals: finalIntervals };
-  }
-);
+  return { intervals: finalIntervals };
+}

@@ -2,6 +2,7 @@
 "use server";
 
 import { getDynamicServiceIntervals, type DynamicServiceIntervalsInput, type DynamicServiceIntervalsOutput } from "@/ai/flows/dynamic-service-intervals";
+import { getStandardServiceIntervals } from "@/ai/tools/service-data-tool";
 import { z } from "zod";
 import { formSchema, type FormValues } from "@/lib/schema";
 import { saveVehicle as saveVehicleToDb } from "@/firebase/firestore/mutations";
@@ -40,7 +41,13 @@ export async function getServiceScheduleAction(values: FormValues): Promise<Acti
     }
   }
   
-  const aiInput = mapFormToAIInput(validatedFields.data);
+  // Step 1: Get the baseline service intervals first.
+  const standardIntervals = await getStandardServiceIntervals({
+    make: validatedFields.data.make,
+    model: validatedFields.data.model,
+  });
+
+  const aiInput = mapFormToAIInput(validatedFields.data, standardIntervals.intervals);
 
   try {
     const result = await getDynamicServiceIntervals(aiInput);
@@ -95,7 +102,7 @@ export async function saveVehicleAction(userId: string, values: FormValues): Pro
 }
 
 
-function mapFormToAIInput(data: FormValues): DynamicServiceIntervalsInput {
+function mapFormToAIInput(data: FormValues, standardIntervals: any[]): DynamicServiceIntervalsInput {
     const {
         make,
         model,
@@ -119,5 +126,6 @@ function mapFormToAIInput(data: FormValues): DynamicServiceIntervalsInput {
             ...(forcedInduction === 'supercharger' && { supercharger: superchargerKit }),
             ...(engineSwap !== 'stock' && { engineSwap }),
         },
+        standardIntervals,
       };
 }
