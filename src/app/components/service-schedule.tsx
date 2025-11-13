@@ -22,7 +22,10 @@ export function ServiceSchedule({ result, formValues }: ServiceScheduleProps) {
             I'm still getting constant errors when inputting my cars details. Why? What is occurring?
           </CardTitle>
           <CardDescription className="text-destructive/90">
-            I'm sorry you're seeing this error. It means the AI model failed to generate a schedule based on the specific combination of inputs you provided. Please try adjusting the modification details or service history and try again while I work on a more permanent solution.
+            {result.error === "I'm still getting constant errors when inputting my cars details. Why? What is occurring?" 
+              ? "I'm sorry you're seeing this error. It means the AI model failed to generate a schedule based on the specific combination of inputs you provided. Please try adjusting the modification details or service history and try again while I work on a more permanent solution."
+              : result.error
+            }
           </CardDescription>
         </CardHeader>
       </Card>

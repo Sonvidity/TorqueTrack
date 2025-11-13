@@ -20,9 +20,24 @@ export async function getServiceScheduleAction(values: FormValues): Promise<Acti
   if (!validatedFields.success) {
     return {
       success: false,
-      error: "Invalid form data.",
+      error: "Invalid form data. Please check the fields for errors.",
       issues: validatedFields.error.issues,
     };
+  }
+
+  // Pre-flight validation
+  if (validatedFields.data.lastServiceKms && validatedFields.data.lastServiceKms > validatedFields.data.chassisKms) {
+    return {
+      success: false,
+      error: "Validation Error: KMs at last service cannot be greater than current chassis KMs."
+    }
+  }
+
+  if (validatedFields.data.hasSwappedEngine && validatedFields.data.engineSwapKms && validatedFields.data.engineSwapKms > validatedFields.data.chassisKms) {
+    return {
+        success: false,
+        error: "Validation Error: Chassis KMs at engine swap cannot be greater than current chassis KMs."
+    }
   }
   
   const aiInput = mapFormToAIInput(validatedFields.data);
@@ -30,9 +45,17 @@ export async function getServiceScheduleAction(values: FormValues): Promise<Acti
   try {
     const result = await getDynamicServiceIntervals(aiInput);
     return { success: true, data: result };
-  } catch (error) {
-    console.error("Error getting service intervals:", error);
-    return { success: false, error: "An unexpected error occurred while generating the service schedule. Please try again." };
+  } catch (error: any) {
+    console.error("Error in getServiceScheduleAction:", error);
+    // Provide more specific feedback if the AI fails
+    const errorMessage = error.message?.includes('SAFETY') 
+      ? "The AI model refused to generate a schedule due to safety concerns with the provided inputs. Please adjust and try again."
+      : "I'm still getting constant errors when inputting my cars details. Why? What is occurring?";
+    
+    return { 
+      success: false, 
+      error: errorMessage
+    };
   }
 }
 
