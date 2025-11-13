@@ -28,7 +28,6 @@ const ENGINE_ITEMS = [
   'Engine Oil & Filter',
   'Spark Plugs (Iridium/Platinum)',
   'Air Filter',
-  'Coolant',
   'Timing Belt',
   'Transmission Fluid (Automatic)',
   'Transmission Fluid (Manual)',
@@ -47,39 +46,44 @@ export function ServiceScheduleDisplay({ schedule, formValues }: ServiceSchedule
         lastServiceItems
     } = formValues;
 
-    // Calculate current engine KMs if swapped
     const currentEngineKms = (hasSwappedEngine && engineSwapKms && engineKmsAtSwap)
         ? (chassisKms - engineSwapKms) + engineKmsAtSwap
         : chassisKms;
     
     const currentKms = isEngineItem ? currentEngineKms : chassisKms;
 
-    let lastServicePoint = 0; // This will be in the context of the part (engine or chassis)
-    let serviceFound = false;
+    let lastServicePoint = 0;
 
-    // Rule 1: Was the specific item serviced recently? This is the highest priority.
+    // Rule 1: Was the specific item serviced recently?
     if (lastServiceKms && lastServiceItems?.toLowerCase().includes(item.item.toLowerCase())) {
-        serviceFound = true;
         if (isEngineItem) {
             // Service was recorded at chassis KMs. We need to find the equivalent *engine* KMs at that time.
             if(hasSwappedEngine && engineSwapKms && engineKmsAtSwap && lastServiceKms > engineSwapKms) {
                 lastServicePoint = (lastServiceKms - engineSwapKms) + engineKmsAtSwap;
             } else {
-                // If service was before the swap, or no swap, the chassis KM is the reference point (assuming original engine)
                 lastServicePoint = lastServiceKms;
             }
         } else {
-            // For chassis parts, it's simple.
             lastServicePoint = lastServiceKms;
         }
     } 
-    // Rule 2: If not, is it an engine item with a swap history?
-    // The engine installation acts as a "service" for all engine components.
+    // Rule 2: If not, was there a general service performed?
+    else if (lastServiceKms) {
+         if (isEngineItem) {
+            if(hasSwappedEngine && engineSwapKms && engineKmsAtSwap && lastServiceKms > engineSwapKms) {
+                lastServicePoint = (lastServiceKms - engineSwapKms) + engineKmsAtSwap;
+            } else {
+                lastServicePoint = lastServiceKms;
+            }
+        } else {
+            lastServicePoint = lastServiceKms;
+        }
+    }
+    // Rule 3: If no service history, but engine was swapped, the swap is the service point for engine items.
     else if (isEngineItem && hasSwappedEngine && engineKmsAtSwap) {
-        serviceFound = true;
         lastServicePoint = engineKmsAtSwap;
     }
-    // Rule 3: Default to 0 (never serviced)
+    // Rule 4: Default to 0 (never serviced)
     else {
         lastServicePoint = 0;
     }
