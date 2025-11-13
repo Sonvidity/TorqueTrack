@@ -1,10 +1,28 @@
 {
   "placeholderImages": [
     {
-      "id": "hero-image",
-      "description": "A close-up of a high-performance car engine bay, showcasing intricate details and modifications.",
-      "imageUrl": "https://images.unsplash.com/photo-1606577924006-27d39b132ae2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxjYXIlMjBlbmdpbmV8ZW58MHx8fHwxNzYyODU2MjgzfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "car engine"
+      "id": "gallery-jdm-1",
+      "description": "A classic white Japanese sports car from the 90s parked on a city street at night.",
+      "imageUrl": "https://images.unsplash.com/photo-1619512229569-043799971513?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxuaXNzYW4lMjBza3lsaW5lfGVufDB8fHx8MTc5MzE4MzQ5OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "JDM car"
+    },
+    {
+      "id": "gallery-jdm-2",
+      "description": "A modified red Japanese sports car with a large rear wing.",
+      "imageUrl": "https://images.unsplash.com/photo-1552655382-1cffe9a05423?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx0b3lvdGElMjBzdXByYXxlbnwwfHx8fDE3OTMxODM1MjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "JDM sports car"
+    },
+    {
+      "id": "gallery-jdm-3",
+      "description": "A blue Japanese sports car known for its rally heritage, driving on a winding road.",
+      "imageUrl": "https://images.unsplash.com/photo-1616422285623-13ff0162193c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzdWJhcnUlMjB3cnh8ZW58MHx8fHwxNzkzMTgzNTQxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "rally car"
+    },
+    {
+      "id": "gallery-jdm-4",
+      "description": "A sleek black Japanese sports car with pop-up headlights.",
+      "imageUrl": "https://images.unsplash.com/photo-1604353435413-a1694544f867?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtYXpkYSUyMHJ4N3xlbnwwfHx8fDE3OTMxODM1NjB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "rotary engine"
     }
   ]
 }

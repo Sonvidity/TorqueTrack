@@ -2,6 +2,14 @@ import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { TorqueTrackForm } from '@/app/components/torque-track-form';
 import { Logo } from '@/app/components/icons/logo';
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 function Header() {
   return (
@@ -20,26 +28,44 @@ function Header() {
 }
 
 export default function Home() {
-  const heroImage = PlaceHolderImages.find((img) => img.id === 'hero-image');
+  const galleryImages = PlaceHolderImages.filter((img) => img.id.startsWith('gallery-'));
 
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
       <main className="flex-1">
         <div className="container mx-auto px-4 pb-16">
-          {heroImage && (
-            <div className="mb-12 overflow-hidden rounded-lg shadow-lg">
-              <Image
-                src={heroImage.imageUrl}
-                alt={heroImage.description}
-                width={1200}
-                height={400}
-                className="w-full object-cover"
-                data-ai-hint={heroImage.imageHint}
-                priority
-              />
-            </div>
-          )}
+          <div className="mb-12">
+            <Carousel
+              opts={{
+                align: "start",
+                loop: true,
+              }}
+              className="w-full"
+            >
+              <CarouselContent>
+                {galleryImages.map((image, index) => (
+                  <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                    <div className="p-1">
+                      <Card>
+                        <CardContent className="relative flex aspect-video items-center justify-center p-0 overflow-hidden rounded-lg">
+                          <Image
+                            src={image.imageUrl}
+                            alt={image.description}
+                            fill
+                            className="object-cover"
+                            data-ai-hint={image.imageHint}
+                          />
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="hidden sm:flex" />
+              <CarouselNext className="hidden sm:flex" />
+            </Carousel>
+          </div>
           <TorqueTrackForm />
         </div>
       </main>
