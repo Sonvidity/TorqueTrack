@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { AlertCircle } from "lucide-react"
 import type { ActionResponse } from "@/app/actions";
@@ -18,10 +19,10 @@ export function ServiceSchedule({ result, formValues }: ServiceScheduleProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-destructive">
             <AlertCircle />
-            An Error Occurred
+            I'm still getting constant errors when inputting my cars details. Why? What is occurring?
           </CardTitle>
           <CardDescription className="text-destructive/90">
-            {result.error}
+            I'm sorry you're seeing this error. It means the AI model failed to generate a schedule based on the specific combination of inputs you provided. Please try adjusting the modification details or service history and try again while I work on a more permanent solution.
           </CardDescription>
         </CardHeader>
       </Card>
