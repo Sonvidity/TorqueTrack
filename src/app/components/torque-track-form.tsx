@@ -1,12 +1,17 @@
+
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
-import { getServiceScheduleAction, type ActionResponse } from "@/app/actions";
+import { getServiceScheduleAction, saveVehicleAction, type ActionResponse } from "@/app/actions";
 import { formSchema } from "@/lib/schema";
 import { vehicles, commonEngineSwaps } from "@/lib/vehicles";
+import { useUser } from "@/firebase/index";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+
 
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +37,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ServiceSchedule } from "./service-schedule";
 import { Separator } from "@/components/ui/separator";
+import { Save } from "lucide-react";
 
 function LoadingIndicator() {
   return (
@@ -70,7 +76,12 @@ type TorqueTrackFormProps = {
 
 export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [result, setResult] = useState<ActionResponse | null>(null);
+  const { user } = useUser();
+  const { toast } = useToast();
+  const router = useRouter();
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -119,6 +130,36 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
     const actionResult = await getServiceScheduleAction(values);
     setResult(actionResult);
     setIsLoading(false);
+  }
+
+  async function handleSave() {
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "You need to be logged in to save a vehicle.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsSaving(true);
+    const values = form.getValues();
+    const result = await saveVehicleAction(values);
+
+    if (result.success) {
+      toast({
+        title: "Vehicle Saved!",
+        description: `${values.year} ${values.make} ${values.model} has been added to your garage.`,
+      });
+      router.push(`/my-vehicles/${result.vehicleId}`);
+    } else {
+      toast({
+        title: "Error",
+        description: result.error || "Could not save the vehicle.",
+        variant: "destructive",
+      });
+    }
+    setIsSaving(false);
   }
   
   return (
@@ -325,9 +366,15 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
               
               <Separator />
 
-              <div className="flex justify-end">
-                <Button type="submit" disabled={isLoading} size="lg">
-                  Generate Schedule
+              <div className="flex justify-end gap-4">
+                {user && (
+                    <Button type="button" variant="outline" onClick={handleSave} disabled={isSaving || isLoading}>
+                        <Save className="mr-2 h-4 w-4" />
+                        {isSaving ? "Saving..." : "Save to Garage"}
+                    </Button>
+                )}
+                <Button type="submit" disabled={isLoading || isSaving} size="lg">
+                  {isLoading ? "Generating..." : "Generate Schedule"}
                 </Button>
               </div>
             </form>

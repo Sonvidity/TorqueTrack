@@ -3,6 +3,8 @@ import { cn } from "@/lib/utils";
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
+import { ThemeProvider } from '@/components/theme-provider';
+import AuthListener from '@/firebase/auth/use-auth-listener';
 
 export const metadata: Metadata = {
   title: 'TorqueTrack',
@@ -22,10 +24,18 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Source+Code+Pro:wght@400;500;600&display=swap" rel="stylesheet" />
       </head>
       <body className={cn("font-body antialiased")}>
-        <FirebaseClientProvider>
-          {children}
-        </FirebaseClientProvider>
-        <Toaster />
+        <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+        >
+            <FirebaseClientProvider>
+                <AuthListener />
+                {children}
+            </FirebaseClientProvider>
+            <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -17,3 +17,10 @@ export const formSchema = z.object({
   lastServiceKms: z.number().min(0, "KMs must be a positive number.").optional(),
   lastServiceItems: z.string().optional(),
 });
+
+export type FormValues = z.infer<typeof formSchema>;
+
+export type Vehicle = FormValues & {
+    id: string;
+    userId: string;
+};
