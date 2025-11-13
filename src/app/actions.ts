@@ -1,7 +1,7 @@
 
 "use server";
 
-import { getStandardServiceIntervals } from "@/ai/tools/service-data-tool";
+import { getStandardServiceIntervals } from "@/lib/service-data";
 import { z } from "zod";
 import { formSchema, type FormValues } from "@/lib/schema";
 import { saveVehicle as saveVehicleToDb } from "@/firebase/firestore/mutations";
@@ -43,7 +43,7 @@ export async function getServiceScheduleAction(values: FormValues): Promise<Acti
   
   try {
     // Step 1: Get the baseline service intervals first.
-    const standardIntervals = await getStandardServiceIntervals({
+    const standardIntervals = getStandardServiceIntervals({
       make: validatedFields.data.make,
       model: validatedFields.data.model,
     });
