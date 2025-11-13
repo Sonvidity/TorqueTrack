@@ -2,28 +2,37 @@
 'use client';
 
 import { doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, initializeFirestore } from 'firebase/firestore';
 import { setDocumentNonBlocking, deleteDocumentNonBlocking, updateDocumentNonBlocking } from '../non-blocking-updates';
 import type { Vehicle } from '@/lib/schema';
+import { getApp, getApps, initializeApp } from 'firebase/app';
+import { firebaseConfig } from '../config';
 
-// This is a client-side only file.
-// We are intentionally getting a new firestore instance
-// instead of using the one from the provider because
-// this can be used in server actions.
-const db = getFirestore();
+// Helper function to initialize Firestore for server-side actions
+const getDb = () => {
+    if (!getApps().length) {
+        const app = initializeApp(firebaseConfig);
+        // Use initializeFirestore to avoid issues with multiple instances in server actions
+        return initializeFirestore(app, {});
+    }
+    return getFirestore(getApp());
+}
 
-export const saveVehicle = async (userId: string, vehicleId: string, vehicleData: Vehicle) => {
+export const saveVehicle = (userId: string, vehicleId: string, vehicleData: Vehicle) => {
+    const db = getDb();
     const vehicleRef = doc(db, 'users', userId, 'vehicles', vehicleId);
-    // Use the non-blocking update to allow for optimistic UI updates
+    // Use the non-blocking update to allow for optimistic UI updates on the client
     setDocumentNonBlocking(vehicleRef, vehicleData, { merge: true });
 };
 
-export const updateVehicle = async (userId: string, vehicleId: string, updates: Partial<Vehicle>) => {
+export const updateVehicle = (userId: string, vehicleId: string, updates: Partial<Vehicle>) => {
+    const db = getDb();
     const vehicleRef = doc(db, 'users', userId, 'vehicles', vehicleId);
     updateDocumentNonBlocking(vehicleRef, updates);
 };
 
-export const deleteVehicle = async (userId: string, vehicleId: string) => {
+export const deleteVehicle = (userId: string, vehicleId: string) => {
+    const db = getDb();
     const vehicleRef = doc(db, 'users', userId, 'vehicles', vehicleId);
     deleteDocumentNonBlocking(vehicleRef);
 };

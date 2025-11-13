@@ -37,27 +37,29 @@ export async function getServiceScheduleAction(values: FormValues): Promise<Acti
 }
 
 export async function saveVehicleAction(userId: string, values: FormValues): Promise<{success: boolean; error?: string, vehicleId?: string}> {
+    if (!userId) {
+        return { success: false, error: "User not authenticated." };
+    }
+
     const validatedFields = formSchema.safeParse(values);
     if (!validatedFields.success) {
         return { success: false, error: "Invalid form data." };
     }
 
-    if (!userId) {
-        return { success: false, error: "User not authenticated." };
-    }
-
+    const vehicleId = nanoid();
     const vehicleData = {
-        id: nanoid(),
         ...validatedFields.data,
+        id: vehicleId,
         userId: userId,
     }
 
     try {
-        await saveVehicleToDb(userId, vehicleData.id, vehicleData);
-        return { success: true, vehicleId: vehicleData.id };
+        await saveVehicleToDb(userId, vehicleId, vehicleData);
+        return { success: true, vehicleId: vehicleId };
     } catch (e) {
         console.error('Failed to save vehicle:', e)
-        return { success: false, error: "Failed to save vehicle." };
+        const errorMessage = e instanceof Error ? e.message : "An unknown error occurred.";
+        return { success: false, error: `Failed to save vehicle: ${errorMessage}` };
     }
 }
 

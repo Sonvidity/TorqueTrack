@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -36,7 +37,7 @@ const DynamicServiceIntervalsInputSchema = z.object({
   drivingHabits: z
     .string()
     .describe(
-      'Description of the driving habits, e.g., daily driving, track days, driven hard.'
+      'Description of the ariving habits, e.g., daily driving, track days, driven hard.'
     ),
   engineKms: z.number().optional().describe('The current kilometers on the engine, if different from chassis.'),
   chassisKms: z.number().optional().describe('The current kilometers on the chassis.'),
@@ -123,8 +124,15 @@ const prompt = ai.definePrompt({
 
   Based on ALL this information, provide a service schedule. 
   For each item, you MUST determine if the service is currently due. To do this, you must consider the correct base mileage. 
-  - For chassis items (brakes, suspension), use the chassis KMs.
-  - For engine-specific items (oil, spark plugs, belts), you MUST use the engine's effective mileage. If an engine swap occurred, the effective mileage is the KMs done SINCE the swap. If 'lastServiceItems' is provided for an engine item, that is the most recent event and should be used as the starting point for that item's interval.
+  
+  Here is the logic for determining if an item is due:
+  1. Determine the 'baseKms' for the item. For chassis items (brakes, suspension, tires, cabin air filter), use 'chassisKms'. For engine-specific items (oil, spark plugs, belts, air filter, coolant, transmission fluid, differential fluid), use the 'engineKms'.
+  2. Determine the 'lastServicedAtKms'. 
+     - If the 'item' is listed in 'lastServiceItems', then 'lastServicedAtKms' is the 'lastServiceKms' value.
+     - If the item is NOT in 'lastServiceItems' AND an engine swap occurred, the 'lastServicedAtKms' for engine items is effectively the 'engineKmsAtSwap' value (or 0 if not provided), because a full service is assumed at swap time. The KMs on the chassis at the time of the swap was 'engineSwapKms'. The effective service point in the car's life is 'engineSwapKms'.
+     - Otherwise, 'lastServicedAtKms' is 0.
+  3. Calculate KMs since last service: 'kmsSinceService' = 'baseKms' - 'lastServicedAtKms'.
+  4. Check if due: 'isDue' is true if 'kmsSinceService' is greater than or equal to the item's 'intervalKms'.
 
   Set the 'isDue' flag to true if the service is due, and false otherwise. Explain the reasoning behind each adjustment.
 
