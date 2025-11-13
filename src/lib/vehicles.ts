@@ -12,9 +12,34 @@ export const vehicles: Vehicle[] = [
     make: "Honda",
     models: [
       {
-        name: "Accord CL9 Euro",
+        name: "Accord (Euro)",
         years: Array.from({ length: 2008 - 2003 + 1 }, (_, i) => 2003 + i),
         engine: "K24A3",
+      },
+      {
+        name: "Civic (EK)",
+        years: Array.from({ length: 2000 - 1996 + 1}, (_, i) => 1996 + i),
+        engine: "D-series / B-series"
+      },
+      {
+        name: "Civic (EP)",
+        years: Array.from({ length: 2005 - 2001 + 1}, (_, i) => 2001 + i),
+        engine: "D-series / K-series"
+      },
+      {
+        name: "Civic (FN/FD)",
+        years: Array.from({ length: 2011 - 2006 + 1}, (_, i) => 2006 + i),
+        engine: "R18 / K20"
+      },
+       {
+        name: "Civic (FB/FG)",
+        years: Array.from({ length: 2015 - 2012 + 1}, (_, i) => 2012 + i),
+        engine: "R18 / K24"
+      },
+      {
+        name: "Civic (FK/FC)",
+        years: Array.from({ length: 2021 - 2016 + 1}, (_, i) => 2016 + i),
+        engine: "L15 / K20C"
       },
     ],
   },
@@ -33,7 +58,7 @@ export const vehicles: Vehicle[] = [
     models: [
       {
         name: "86 / BRZ",
-        years: Array.from({ length: 2020 - 2012 + 1 }, (_, i) => 2012 + i),
+        years: Array.from({ length: 2021 - 2012 + 1 }, (_, i) => 2012 + i),
         engine: "FA20",
       },
     ],
@@ -43,8 +68,28 @@ export const vehicles: Vehicle[] = [
     models: [
       {
         name: "BRZ / 86",
-        years: Array.from({ length: 2020 - 2012 + 1 }, (_, i) => 2012 + i),
+        years: Array.from({ length: 2021 - 2012 + 1 }, (_, i) => 2012 + i),
         engine: "FA20",
+      },
+      {
+        name: "Impreza WRX (GC8)",
+        years: Array.from({ length: 2000 - 1992 + 1 }, (_, i) => 1992 + i),
+        engine: "EJ20",
+      },
+      {
+        name: "Impreza WRX (GDA/GGA)",
+        years: Array.from({ length: 2007 - 2000 + 1 }, (_, i) => 2000 + i),
+        engine: "EJ20 / EJ25",
+      },
+      {
+        name: "Impreza WRX (GE/GH/GR/GV)",
+        years: Array.from({ length: 2014 - 2007 + 1 }, (_, i) => 2007 + i),
+        engine: "EJ25",
+      },
+      {
+        name: "WRX (VA)",
+        years: Array.from({ length: 2021 - 2014 + 1 }, (_, i) => 2014 + i),
+        engine: "FA20DIT",
       },
     ],
   },
