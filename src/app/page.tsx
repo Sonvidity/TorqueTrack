@@ -1,3 +1,7 @@
+
+'use client';
+
+import { useState, useMemo } from 'react';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { TorqueTrackForm } from '@/app/components/torque-track-form';
@@ -85,7 +89,19 @@ function ExplanationSection() {
 
 
 export default function Home() {
-  const galleryImages = PlaceHolderImages.filter((img) => img.id.startsWith('gallery-'));
+  const [selectedMake, setSelectedMake] = useState<string | null>('Toyota');
+
+  const galleryImages = useMemo(() => {
+    const defaultImages = PlaceHolderImages.filter(img => img.tags.includes('default'));
+    if (!selectedMake) {
+      return defaultImages;
+    }
+    const makeImages = PlaceHolderImages.filter(img => img.tags.includes(selectedMake));
+    // Use a Set to avoid duplicates and combine make-specific images with defaults
+    const combined = new Set([...makeImages, ...defaultImages]);
+    return Array.from(combined);
+  }, [selectedMake]);
+
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -103,7 +119,7 @@ export default function Home() {
             >
               <CarouselContent>
                 {galleryImages.map((image, index) => (
-                  <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                  <CarouselItem key={image.id} className="md:basis-1/2 lg:basis-1/3">
                     <div className="p-1">
                       <Card>
                         <CardContent className="relative flex aspect-video items-center justify-center p-0 overflow-hidden rounded-lg">
@@ -124,7 +140,7 @@ export default function Home() {
               <CarouselNext className="hidden sm:flex" />
             </Carousel>
           </div>
-          <TorqueTrackForm />
+          <TorqueTrackForm onMakeChange={setSelectedMake} />
           <ExplanationSection />
         </div>
       </main>

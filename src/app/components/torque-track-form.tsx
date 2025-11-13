@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
@@ -63,7 +63,12 @@ function LoadingIndicator() {
   );
 }
 
-export function TorqueTrackForm() {
+type TorqueTrackFormProps = {
+  onMakeChange: (make: string | null) => void;
+};
+
+
+export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<ActionResponse | null>(null);
 
@@ -90,6 +95,10 @@ export function TorqueTrackForm() {
   const model = form.watch("model");
   const forcedInduction = form.watch("forcedInduction");
   const engineSwap = form.watch("engineSwap");
+
+  useEffect(() => {
+    onMakeChange(make);
+  }, [make, onMakeChange]);
 
   const availableModels = useMemo(() => {
     return vehicles.find((v) => v.make === make)?.models || [];
@@ -124,8 +133,8 @@ export function TorqueTrackForm() {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <Tabs defaultValue="vehicle">
-                <TabsList className="grid w-full grid-cols-4">
+              <Tabs defaultValue="vehicle" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
                   <TabsTrigger value="vehicle">Vehicle</TabsTrigger>
                   <TabsTrigger value="usage">Usage</TabsTrigger>
                   <TabsTrigger value="mods">Modifications</TabsTrigger>
