@@ -21,9 +21,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 function UserNav() {
   const auth = useAuth();
-  const { user, isLoading } = useUser();
+  const { user, loading } = useUser();
 
-  if (isLoading || !auth) {
+  if (loading) {
     return (
       <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
     );
@@ -41,6 +41,7 @@ function UserNav() {
   }
 
   const handleLogout = async () => {
+    if (!auth) return;
     try {
       await signOut(auth);
     } catch (error) {
@@ -128,3 +129,4 @@ export function MainNav({ className, ...props }: React.HTMLAttributes<HTMLElemen
     </nav>
   );
 }
+
