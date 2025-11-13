@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth, useUser } from '@/firebase/index';
 import { signOut } from 'firebase/auth';
-import { LogIn, LogOut, Car, Moon, Sun } from 'lucide-react';
+import { LogIn, LogOut, Car, Moon, Sun, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/app/components/icons/logo';
 import { cn } from '@/lib/utils';
@@ -143,6 +143,11 @@ export function MainNav({ className, ...props }: React.HTMLAttributes<HTMLElemen
       active: pathname === '/',
     },
     {
+        href: '/how-it-works',
+        label: 'How It Works',
+        active: pathname === '/how-it-works',
+    },
+    {
       href: '/my-vehicles',
       label: 'My Cars',
       active: pathname === '/my-vehicles',
@@ -159,7 +164,21 @@ export function MainNav({ className, ...props }: React.HTMLAttributes<HTMLElemen
         <Logo className="h-6 w-6" />
         <span className="hidden sm:inline-block">TorqueTrack</span>
       </Link>
-      <div className="flex-1" />
+      <div className="hidden md:flex items-center space-x-4 flex-1">
+        {routes.map((route) => (
+          <Link
+            key={route.href}
+            href={route.href}
+            className={cn(
+              "text-sm font-medium transition-colors hover:text-primary",
+              route.active ? "text-primary" : "text-muted-foreground"
+            )}
+          >
+            {route.label}
+          </Link>
+        ))}
+      </div>
+      <div className="flex-1 md:hidden" />
       <div className="flex items-center space-x-4">
         <UserNav />
       </div>

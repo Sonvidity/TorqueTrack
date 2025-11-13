@@ -29,44 +29,55 @@ const ENGINE_ITEMS = [
   'Spark Plugs (Iridium/Platinum)',
   'Air Filter',
   'Coolant',
-  'Timing Belt'
+  'Timing Belt',
+  'Transmission Fluid (Automatic)',
+  'Transmission Fluid (Manual)',
 ];
 
 export function ServiceScheduleDisplay({ schedule, formValues }: ServiceScheduleDisplayProps) {
   
   const calculateDueStatus = (item: ServiceItem) => {
     const isEngineItem = ENGINE_ITEMS.includes(item.item);
+    const { 
+        chassisKms, 
+        hasSwappedEngine, 
+        engineSwapKms, 
+        engineKmsAtSwap,
+        lastServiceKms,
+        lastServiceItems
+    } = formValues;
 
-    let currentKms = formValues.chassisKms;
-    if (isEngineItem) {
-        currentKms = formValues.hasSwappedEngine && formValues.engineSwapKms && formValues.engineKmsAtSwap
-            ? (formValues.chassisKms - formValues.engineSwapKms) + formValues.engineKmsAtSwap
-            : formValues.chassisKms;
-    }
-
-    let lastServicePoint = 0;
+    // Calculate current engine KMs if swapped
+    const currentEngineKms = (hasSwappedEngine && engineSwapKms && engineKmsAtSwap)
+        ? (chassisKms - engineSwapKms) + engineKmsAtSwap
+        : chassisKms;
     
-    // Rule 1: Was the specific item serviced recently? This is the highest priority.
-    // We check if the item's name (case-insensitive) is in the lastServiceItems string.
-    if (formValues.lastServiceKms && formValues.lastServiceItems?.toLowerCase().includes(item.item.toLowerCase())) {
-        lastServicePoint = formValues.lastServiceKms;
+    const currentKms = isEngineItem ? currentEngineKms : chassisKms;
 
-        // If it's an engine item on a swapped engine, we need to calculate the *engine's* KMs at the time of that service
-        if (isEngineItem && formValues.hasSwappedEngine && formValues.engineSwapKms && formValues.engineKmsAtSwap) {
-           const chassisKmsSinceSwapAtServiceTime = formValues.lastServiceKms - formValues.engineSwapKms;
-           if(chassisKmsSinceSwapAtServiceTime > 0) {
-              lastServicePoint = formValues.engineKmsAtSwap + chassisKmsSinceSwapAtServiceTime;
-           } else {
-              // This case is tricky - service was before swap. Assume it doesn't apply to the new engine.
-              // So, we fall through to Rule 2, which is the engine's installation mileage.
-              lastServicePoint = formValues.engineKmsAtSwap;
-           }
+    let lastServicePoint = 0; // This will be in the context of the part (engine or chassis)
+    let serviceFound = false;
+
+    // Rule 1: Was the specific item serviced recently? This is the highest priority.
+    if (lastServiceKms && lastServiceItems?.toLowerCase().includes(item.item.toLowerCase())) {
+        serviceFound = true;
+        if (isEngineItem) {
+            // Service was recorded at chassis KMs. We need to find the equivalent *engine* KMs at that time.
+            if(hasSwappedEngine && engineSwapKms && engineKmsAtSwap && lastServiceKms > engineSwapKms) {
+                lastServicePoint = (lastServiceKms - engineSwapKms) + engineKmsAtSwap;
+            } else {
+                // If service was before the swap, or no swap, the chassis KM is the reference point (assuming original engine)
+                lastServicePoint = lastServiceKms;
+            }
+        } else {
+            // For chassis parts, it's simple.
+            lastServicePoint = lastServiceKms;
         }
     } 
     // Rule 2: If not, is it an engine item with a swap history?
     // The engine installation acts as a "service" for all engine components.
-    else if (isEngineItem && formValues.hasSwappedEngine && formValues.engineKmsAtSwap) {
-        lastServicePoint = formValues.engineKmsAtSwap;
+    else if (isEngineItem && hasSwappedEngine && engineKmsAtSwap) {
+        serviceFound = true;
+        lastServicePoint = engineKmsAtSwap;
     }
     // Rule 3: Default to 0 (never serviced)
     else {
@@ -76,10 +87,10 @@ export function ServiceScheduleDisplay({ schedule, formValues }: ServiceSchedule
     const kmsSinceLastService = currentKms - lastServicePoint;
 
     if (kmsSinceLastService >= item.intervalKms) {
-      return { isDue: true, kmsSinceLastService };
+      return { isDue: true, kmsSinceLastService, lastServicePoint, currentKms };
     }
 
-    return { isDue: false, kmsSinceLastService };
+    return { isDue: false, kmsSinceLastService, lastServicePoint, currentKms };
   };
 
   const processedSchedule = schedule.map(item => {
@@ -119,7 +130,7 @@ export function ServiceScheduleDisplay({ schedule, formValues }: ServiceSchedule
           <AccordionContent className="pl-12 pb-4">
              <p className="text-muted-foreground">{item.reason}</p>
              <p className="text-xs text-muted-foreground/80 mt-2">
-                Last serviced ~{Math.max(0, item.kmsSinceLastService).toLocaleString()} km ago.
+                ~{Math.max(0, item.kmsSinceLastService).toLocaleString()} km since last service.
              </p>
           </AccordionContent>
         </AccordionItem>

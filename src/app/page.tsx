@@ -17,6 +17,7 @@ import {
 import { MainNav } from '@/app/components/main-nav';
 import { Lightbulb, Wrench, Rocket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 function Header() {
   return (
@@ -40,7 +41,7 @@ function Hero() {
           Your dynamic service schedule, tuned for your car and your driving style.
         </p>
         <Button variant="outline" asChild>
-          <a href="#how-it-works">How does this work?</a>
+          <Link href="/how-it-works">How does this work?</Link>
         </Button>
       </div>
     </div>
@@ -69,7 +70,7 @@ function ExplanationSection() {
   return (
     <div id="how-it-works" className="container mx-auto px-4 py-12 scroll-mt-20">
       <div className="text-center mb-8">
-        <h2 className="font-headline text-3xl font-bold">How It Works</h2>
+        <h2 className="font-headline text-3xl font-bold">A Smarter Schedule</h2>
         <p className="text-muted-foreground max-w-2xl mx-auto">
           Our AI mechanic analyzes your vehicle's unique profile to create a service schedule that goes beyond the factory recommendations.
         </p>
