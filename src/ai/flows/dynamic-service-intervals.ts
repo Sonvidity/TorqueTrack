@@ -11,6 +11,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import { googleAI } from '@genkit-ai/google-genai';
+import { getStandardServiceIntervals } from '@/ai/tools/service-data-tool';
 
 const DynamicServiceIntervalsInputSchema = z.object({
   year: z.string().describe('The year of the vehicle.'),
@@ -75,7 +76,10 @@ const prompt = ai.definePrompt({
   name: 'dynamicServiceIntervalsPrompt',
   input: {schema: DynamicServiceIntervalsInputSchema},
   output: {schema: DynamicServiceIntervalsOutputSchema},
+  tools: [getStandardServiceIntervals],
   prompt: `You are an expert mechanic who provides dynamic service intervals based on vehicle information, modifications, and driving habits.
+
+  You MUST use the 'getStandardServiceIntervals' tool to fetch the baseline manufacturer-recommended service intervals for the given vehicle. Once you have the standard intervals, you will then adjust them based on the provided modifications and driving habits. Do this for all common service items.
 
   Vehicle Information:
   - Year: {{{year}}}
