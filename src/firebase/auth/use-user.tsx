@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { useAuth } from '@/firebase';
+import { useAuth } from '@/firebase/index';
 import type { User } from 'firebase/auth';
 
 export const useUser = (): { user: User | null | undefined, loading: boolean, error: Error | undefined } => {
