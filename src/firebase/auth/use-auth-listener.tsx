@@ -3,13 +3,13 @@
 
 import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { useUser } from '@/firebase/index';
+import { useUser } from '@/firebase/auth/use-user';
 
 const AUTH_ROUTES = ['/login', '/register'];
-const PUBLIC_ROUTES = ['/']; // Add any other public routes here
+const PUBLIC_ROUTES = ['/', '/how-it-works']; 
 
 const AuthListener = () => {
-  const { user, isUserLoading } = useUser();
+  const { user, loading: isUserLoading } = useUser();
   const router = useRouter();
   const pathname = usePathname();
 

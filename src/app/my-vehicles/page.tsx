@@ -92,7 +92,7 @@ function VehicleList() {
 
 
 export default function MyVehiclesPage() {
-  const { user, isUserLoading } = useUser();
+  const { user, loading: isUserLoading } = useUser();
   const router = useRouter();
 
   if (isUserLoading) {
