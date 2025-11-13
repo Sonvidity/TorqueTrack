@@ -72,7 +72,7 @@ const prompt = ai.definePrompt({
   name: 'dynamicServiceIntervalsPrompt',
   input: {schema: DynamicServiceIntervalsInputSchema},
   output: {schema: DynamicServiceIntervalsOutputSchema},
-  model: 'gemini-1.5-flash-latest',
+  model: 'gemini-1.5-flash',
   prompt: `You are an expert mechanic who provides dynamic service intervals based on vehicle information, modifications, and driving habits.
 
   Your task is to take the provided 'standardIntervals' and adjust them based on the vehicle's modifications and driving habits.
