@@ -8,7 +8,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Wrench, AlertCircle, Bell } from "lucide-react"
+import { Wrench, Bell } from "lucide-react"
 import { Badge } from "@/components/ui/badge";
 import type { FormValues } from "@/lib/schema";
 
@@ -46,7 +46,8 @@ export function ServiceScheduleDisplay({ schedule, formValues }: ServiceSchedule
 
     let lastServicePoint = 0;
     
-    // Rule 1: Was the specific item serviced recently?
+    // Rule 1: Was the specific item serviced recently? This is the highest priority.
+    // We check if the item's name (case-insensitive) is in the lastServiceItems string.
     if (formValues.lastServiceKms && formValues.lastServiceItems?.toLowerCase().includes(item.item.toLowerCase())) {
         lastServicePoint = formValues.lastServiceKms;
 
@@ -57,12 +58,13 @@ export function ServiceScheduleDisplay({ schedule, formValues }: ServiceSchedule
               lastServicePoint = formValues.engineKmsAtSwap + chassisKmsSinceSwapAtServiceTime;
            } else {
               // This case is tricky - service was before swap. Assume it doesn't apply to the new engine.
-              // Fall through to Rule 2
+              // So, we fall through to Rule 2, which is the engine's installation mileage.
               lastServicePoint = formValues.engineKmsAtSwap;
            }
         }
     } 
     // Rule 2: If not, is it an engine item with a swap history?
+    // The engine installation acts as a "service" for all engine components.
     else if (isEngineItem && formValues.hasSwappedEngine && formValues.engineKmsAtSwap) {
         lastServicePoint = formValues.engineKmsAtSwap;
     }
@@ -90,12 +92,12 @@ export function ServiceScheduleDisplay({ schedule, formValues }: ServiceSchedule
   });
 
   return (
-    <Accordion type="multiple" className="w-full" defaultValue={processedSchedule.filter(item => item.isDue).map((_, index) => `item-${index}`)}>
-      {processedSchedule.map((item, index) => (
-        <AccordionItem value={`item-${index}`} key={index} className={item.isDue ? "border-primary/20" : ""}>
+    <Accordion type="multiple" className="w-full" defaultValue={processedSchedule.filter(item => item.isDue).map((item) => item.item)}>
+      {processedSchedule.map((item) => (
+        <AccordionItem value={item.item} key={item.item} className={item.isDue ? "border-primary/20" : ""}>
           <AccordionTrigger className="hover:no-underline text-left">
             <div className="flex items-center gap-4 w-full">
-              <Checkbox id={`item-check-${index}`} aria-label={`Mark ${item.item} as complete`} />
+              <Checkbox id={`item-check-${item.item}`} aria-label={`Mark ${item.item} as complete`} />
               {item.isDue ? (
                 <Bell className="h-5 w-5 text-primary shrink-0 animate-pulse" />
               ) : (
@@ -117,7 +119,7 @@ export function ServiceScheduleDisplay({ schedule, formValues }: ServiceSchedule
           <AccordionContent className="pl-12 pb-4">
              <p className="text-muted-foreground">{item.reason}</p>
              <p className="text-xs text-muted-foreground/80 mt-2">
-                Last serviced ~{item.kmsSinceLastService.toLocaleString()} km ago.
+                Last serviced ~{Math.max(0, item.kmsSinceLastService).toLocaleString()} km ago.
              </p>
           </AccordionContent>
         </AccordionItem>
