@@ -5,7 +5,8 @@ export const formSchema = z.object({
   model: z.string().min(1, "Model is required."),
   year: z.number().min(1900, "Invalid year.").max(new Date().getFullYear() + 1, "Invalid year."),
   chassisKms: z.number().min(0, "KMs must be a positive number."),
-  engineKms: z.number().min(0, "KMs must be a positive number."),
+  hasSwappedEngine: z.boolean().default(false),
+  engineKms: z.number().min(0, "KMs must be a positive number.").optional(),
   drivingHabits: z.string().min(1, "Driving habits are required."),
   stage: z.string(),
   forcedInduction: z.string(),
@@ -16,6 +17,14 @@ export const formSchema = z.object({
   engineKmsAtSwap: z.number().min(0, "KMs must be a positive number.").optional(),
   lastServiceKms: z.number().min(0, "KMs must be a positive number.").optional(),
   lastServiceItems: z.string().optional(),
+}).refine(data => {
+    if (data.hasSwappedEngine) {
+        return data.engineKms !== undefined && data.engineKms > 0;
+    }
+    return true;
+}, {
+    message: "Engine KMs are required when engine is swapped.",
+    path: ["engineKms"],
 });
 
 export type FormValues = z.infer<typeof formSchema>;

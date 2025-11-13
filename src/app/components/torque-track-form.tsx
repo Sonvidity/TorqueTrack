@@ -34,6 +34,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ServiceSchedule } from "./service-schedule";
 import { Separator } from "@/components/ui/separator";
@@ -88,16 +89,17 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
     defaultValues: {
       make: "Toyota",
       model: "86 / BRZ (ZN6)",
-      year: 2018,
-      chassisKms: 80000,
-      engineKms: 80000,
+      year: 2012,
+      chassisKms: 170325,
+      hasSwappedEngine: true,
+      engineKms: 124325,
       drivingHabits: "Spirited Weekend Drives",
       stage: "none",
       forcedInduction: "none",
       turboType: "",
       superchargerKit: "",
       engineSwap: "stock",
-      lastServiceKms: 75000,
+      lastServiceKms: 166000,
       lastServiceItems: "Oil Change, Oil Filter",
     },
   });
@@ -105,7 +107,10 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
   const make = form.watch("make");
   const model = form.watch("model");
   const forcedInduction = form.watch("forcedInduction");
+  const hasSwappedEngine = form.watch("hasSwappedEngine");
+
   const engineSwap = form.watch("engineSwap");
+
 
   useEffect(() => {
     onMakeChange(make);
@@ -127,7 +132,13 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     setResult(null);
-    const actionResult = await getServiceScheduleAction(values);
+    // If engine is not swapped, set engineKms to chassisKms before submitting
+    const submissionValues = { ...values };
+    if (!submissionValues.hasSwappedEngine) {
+      submissionValues.engineKms = submissionValues.chassisKms;
+    }
+
+    const actionResult = await getServiceScheduleAction(submissionValues);
     setResult(actionResult);
     setIsLoading(false);
   }
@@ -144,7 +155,12 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
     
     setIsSaving(true);
     const values = form.getValues();
-    const result = await saveVehicleAction(user.uid, values);
+     const submissionValues = { ...values };
+    if (!submissionValues.hasSwappedEngine) {
+      submissionValues.engineKms = submissionValues.chassisKms;
+    }
+
+    const result = await saveVehicleAction(user.uid, submissionValues);
 
     if (result.success) {
       toast({
@@ -222,22 +238,46 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
                 </TabsContent>
 
                 <TabsContent value="usage" className="space-y-6">
-                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                    <FormField control={form.control} name="chassisKms" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Chassis KMs</FormLabel>
-                        <FormControl><Input type="number" placeholder="e.g., 100000" {...field} onChange={e => field.onChange(e.target.valueAsNumber)} /></FormControl>
-                        <FormDescription>Total kilometers on the vehicle's body.</FormDescription><FormMessage />
+                  <FormField control={form.control} name="chassisKms" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Chassis KMs</FormLabel>
+                      <FormControl><Input type="number" placeholder="e.g., 100000" {...field} onChange={e => field.onChange(e.target.valueAsNumber)} /></FormControl>
+                      <FormDescription>Total kilometers on the vehicle's body.</FormDescription><FormMessage />
+                    </FormItem>
+                  )} />
+                  <FormField
+                    control={form.control}
+                    name="hasSwappedEngine"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>
+                            Engine has been swapped or replaced
+                          </FormLabel>
+                          <FormDescription>
+                            Select this if the engine isn't the original one that came with the chassis.
+                          </FormDescription>
+                        </div>
                       </FormItem>
-                    )} />
-                    <FormField control={form.control} name="engineKms" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Engine KMs</FormLabel>
-                        <FormControl><Input type="number" placeholder="e.g., 50000" {...field} onChange={e => field.onChange(e.target.valueAsNumber)} /></FormControl>
-                        <FormDescription>Leave same as chassis if original engine.</FormDescription><FormMessage />
-                      </FormItem>
-                    )} />
-                  </div>
+                    )}
+                  />
+                  {hasSwappedEngine && (
+                     <div className="space-y-6 p-4 border rounded-md bg-muted/50 animate-in fade-in-50">
+                        <FormField control={form.control} name="engineKms" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Engine KMs</FormLabel>
+                            <FormControl><Input type="number" placeholder="e.g., 50000" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : e.target.valueAsNumber)} /></FormControl>
+                            <FormDescription>KMs on the replacement engine.</FormDescription><FormMessage />
+                          </FormItem>
+                        )} />
+                     </div>
+                  )}
                   <FormField control={form.control} name="drivingHabits" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Primary Driving Style</FormLabel>
@@ -274,7 +314,7 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
                     )} />
                     <FormField control={form.control} name="engineSwap" render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Engine</FormLabel>
+                        <FormLabel>Engine Type</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl><SelectTrigger><SelectValue placeholder="Select an engine" /></SelectTrigger></FormControl>
                           <SelectContent>
@@ -282,17 +322,19 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
                               <SelectItem key={engine.value} value={engine.value}>{engine.name}</SelectItem>
                             ))}
                           </SelectContent>
-                        </Select><FormMessage />
+                        </Select>
+                        <FormDescription>Select the current engine in your car. Leave as stock if original.</FormDescription>
+                        <FormMessage />
                       </FormItem>
                     )} />
                   </div>
-                  {engineSwap !== 'stock' && (
+                  {hasSwappedEngine && engineSwap !== 'stock' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 border rounded-md bg-muted/50 animate-in fade-in-50">
                        <FormField control={form.control} name="engineSwapKms" render={({ field }) => (
                         <FormItem>
                           <FormLabel>Chassis KMs at Swap</FormLabel>
                           <FormControl><Input type="number" placeholder="e.g., 120000" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : e.target.valueAsNumber)} /></FormControl>
-                          <FormDescription>KMs on the car when the engine was installed.</FormDescription>
+                          <FormDescription>KMs on the car when the new engine was installed.</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )} />

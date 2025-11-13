@@ -54,7 +54,7 @@ export async function saveVehicleAction(userId: string, values: FormValues): Pro
     }
 
     try {
-        await saveVehicleToDb(userId, vehicleId, vehicleData);
+        saveVehicleToDb(userId, vehicleId, vehicleData);
         return { success: true, vehicleId: vehicleId };
     } catch (e) {
         console.error('Failed to save vehicle:', e)
@@ -70,6 +70,7 @@ function mapFormToAIInput(data: FormValues): DynamicServiceIntervalsInput {
         model,
         year,
         chassisKms,
+        hasSwappedEngine,
         engineKms,
         drivingHabits,
         stage,
@@ -88,6 +89,7 @@ function mapFormToAIInput(data: FormValues): DynamicServiceIntervalsInput {
         make,
         model,
         kms: chassisKms,
+        hasSwappedEngine,
         drivingHabits,
         modifications: {
             ...(stage !== 'none' && { stage }),
@@ -95,7 +97,7 @@ function mapFormToAIInput(data: FormValues): DynamicServiceIntervalsInput {
             ...(forcedInduction === 'supercharger' && { supercharger: superchargerKit }),
             ...(engineSwap !== 'stock' && { engineSwap }),
         },
-        ...(engineKms > 0 && { engineKms }),
+        ...(engineKms && engineKms > 0 && { engineKms }),
         ...(chassisKms > 0 && { chassisKms }),
         ...(engineSwapKms && engineSwapKms > 0 && { engineSwapKms }),
         ...(engineKmsAtSwap && engineKmsAtSwap > 0 && { engineKmsAtSwap }),
