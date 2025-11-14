@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { MainNav } from '@/app/components/main-nav';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase/index';
-import { doc, collection } from 'firebase/firestore';
+import { doc } from 'firebase/firestore';
 import type { Vehicle } from '@/lib/schema';
 import { getStandardServiceIntervals } from '@/lib/service-data';
 import { getRuleBasedServiceIntervals, type RuleBasedIntervalsInput } from '@/lib/rule-based-intervals';
@@ -60,7 +60,7 @@ function VehicleServicePage() {
 
   if (isLoading) {
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 animate-pulse">
             <Skeleton className="h-8 w-1/2" />
             <Skeleton className="h-6 w-1/3" />
             <div className="pt-8 space-y-4">
@@ -74,7 +74,7 @@ function VehicleServicePage() {
 
   if (error) {
     return (
-        <Card className="border-destructive bg-destructive/10">
+        <Card className="border-destructive bg-destructive/10 animate-in fade-in-50">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-destructive">
                     <AlertCircle />
@@ -90,7 +90,7 @@ function VehicleServicePage() {
 
   if (!vehicle) {
     return (
-        <div className="text-center">
+        <div className="text-center py-16 animate-in fade-in-50">
             <p className="text-lg font-semibold">Vehicle not found.</p>
             <p className="text-muted-foreground">This vehicle may have been deleted or the link is incorrect.</p>
         </div>
@@ -98,7 +98,7 @@ function VehicleServicePage() {
   }
 
   return (
-    <Card>
+    <Card className="animate-in fade-in-50 duration-500">
         <CardHeader>
             <CardTitle className="font-headline text-3xl">{vehicle.year} {vehicle.make} {vehicle.model}</CardTitle>
             <CardDescription>

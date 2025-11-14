@@ -192,7 +192,7 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
                 </TabsList>
 
                 <div className="pt-8">
-                <TabsContent value="vehicle" className="space-y-6">
+                <TabsContent value="vehicle" className="space-y-6 animate-in fade-in-50 duration-300">
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                     <FormField control={form.control} name="make" render={({ field }) => (
                       <FormItem>
@@ -256,7 +256,7 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
                   />
                 </TabsContent>
 
-                <TabsContent value="usage" className="space-y-6">
+                <TabsContent value="usage" className="space-y-6 animate-in fade-in-50 duration-300">
                   <FormField control={form.control} name="chassisKms" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Chassis KMs</FormLabel>
@@ -308,7 +308,7 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
                   )} />
                 </TabsContent>
 
-                <TabsContent value="mods" className="space-y-6">
+                <TabsContent value="mods" className="space-y-6 animate-in fade-in-50 duration-300">
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <FormField control={form.control} name="stage" render={({ field }) => (
                       <FormItem>
@@ -376,7 +376,7 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
                   )}
                 </TabsContent>
 
-                <TabsContent value="history" className="space-y-6">
+                <TabsContent value="history" className="space-y-6 animate-in fade-in-50 duration-300">
                   {hasSwappedEngine && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 border rounded-md bg-muted/50">
                        <FormField control={form.control} name="engineSwapKms" render={({ field }) => (

@@ -4,18 +4,19 @@ import { AlertCircle } from "lucide-react"
 import type { ActionResponse } from "@/app/actions";
 import { ServiceScheduleDisplay } from "./service-schedule-display";
 import type { FormValues } from "@/lib/schema";
+import { memo } from 'react';
 
 interface ServiceScheduleProps {
     result: ActionResponse | null;
     formValues: FormValues;
 }
 
-export function ServiceSchedule({ result, formValues }: ServiceScheduleProps) {
+function ServiceScheduleComponent({ result, formValues }: ServiceScheduleProps) {
   if (!result) return null;
 
   if (!result.success && result.error) {
     return (
-      <Card className="mt-12 border-destructive bg-destructive/10">
+      <Card className="mt-12 border-destructive bg-destructive/10 animate-in fade-in-50 duration-500">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-destructive">
             <AlertCircle />
@@ -31,7 +32,7 @@ export function ServiceSchedule({ result, formValues }: ServiceScheduleProps) {
   
   if (!result.data?.serviceSchedule?.length) {
     return (
-       <Card className="mt-12">
+       <Card className="mt-12 animate-in fade-in-50 duration-500">
         <CardHeader>
             <CardTitle className="font-headline text-3xl">Recommended Service Schedule</CardTitle>
         </CardHeader>
@@ -57,3 +58,5 @@ export function ServiceSchedule({ result, formValues }: ServiceScheduleProps) {
     </Card>
   );
 }
+
+export const ServiceSchedule = memo(ServiceScheduleComponent);
