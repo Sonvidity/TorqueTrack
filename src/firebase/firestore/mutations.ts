@@ -36,3 +36,4 @@ export const deleteVehicle = async (userId: string, vehicleId: string) => {
     const vehicleRef = doc(db, 'users', userId, 'vehicles', vehicleId);
     await deleteDoc(vehicleRef);
 };
+
