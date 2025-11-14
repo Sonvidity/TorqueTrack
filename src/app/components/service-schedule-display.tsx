@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Accordion,
   AccordionContent,
@@ -90,55 +90,59 @@ export function ServiceScheduleDisplay({ schedule, formValues, vehicle }: Servic
 
   const calculateDueStatus = (item: ServiceItem) => {
     const isEngineItem = ENGINE_ITEMS.includes(item.item);
-    const { 
-        chassisKms, 
-        hasSwappedEngine, 
-        engineSwapKms, 
-        engineKmsAtSwap,
-        lastServiceKms,
-        lastServiceItems
+    const {
+      chassisKms,
+      hasSwappedEngine,
+      engineSwapKms,
+      engineKmsAtSwap,
+      lastServiceKms,
     } = formValues;
-
-    // 1. Determine the current KMS of the component (engine or chassis)
-    const currentEngineKms = (hasSwappedEngine && typeof engineSwapKms === 'number' && typeof engineKmsAtSwap === 'number')
-        ? (chassisKms - engineSwapKms) + engineKmsAtSwap
-        : chassisKms;
-    
-    const currentKms = isEngineItem ? currentEngineKms : chassisKms;
-
-    // 2. Determine the starting KMS point for this service item (lastServicePoint)
-    let lastServicePoint = 0; // Default to 0 if never serviced
-
-    const itemWasServiced = lastServiceItems?.includes(item.item);
-    
-    if (typeof lastServiceKms === 'number') {
-        // A last service exists, this is our primary reference point
-        if (isEngineItem) {
-             // For engine items, we need to translate the chassisKms at last service to engineKms at that time
-            if (hasSwappedEngine && typeof engineSwapKms === 'number' && typeof engineKmsAtSwap === 'number' && lastServiceKms > engineSwapKms) {
-                // Service was done *after* the swap
-                lastServicePoint = (lastServiceKms - engineSwapKms) + engineKmsAtSwap;
-            } else {
-                 // Service was done before the swap, or no swap
-                lastServicePoint = lastServiceKms;
-            }
+  
+    // Type guards for calculations
+    const lastServiceNum = typeof lastServiceKms === 'number' ? lastServiceKms : 0;
+    const chassisKmsNum = typeof chassisKms === 'number' ? chassisKms : 0;
+    const engineSwapKmsNum = typeof engineSwapKms === 'number' ? engineSwapKms : 0;
+    const engineKmsAtSwapNum = typeof engineKmsAtSwap === 'number' ? engineKmsAtSwap : 0;
+  
+    let currentKms = 0;
+    let lastServicePoint = 0;
+  
+    if (isEngineItem) {
+      // Calculate current engine KMs
+      if (hasSwappedEngine && chassisKmsNum > engineSwapKmsNum) {
+        currentKms = (chassisKmsNum - engineSwapKmsNum) + engineKmsAtSwapNum;
+      } else {
+        currentKms = chassisKmsNum; // Engine is original or swap happened after current kms (unlikely)
+      }
+  
+      // Calculate engine KMs at the time of the last service
+      if (lastServiceNum > 0) {
+        if (hasSwappedEngine && lastServiceNum >= engineSwapKmsNum) {
+          // Last service was performed ON THE NEW engine
+          lastServicePoint = (lastServiceNum - engineSwapKmsNum) + engineKmsAtSwapNum;
         } else {
-            // For chassis items, it's simple
-            lastServicePoint = lastServiceKms;
+          // Last service was on the OLD engine, or there was no swap
+          lastServicePoint = lastServiceNum;
         }
-    } else if (isEngineItem && hasSwappedEngine && typeof engineKmsAtSwap === 'number') {
-        // No general service history, but there was an engine swap, so the engine's life starts at its swap-in KMs.
-        lastServicePoint = engineKmsAtSwap;
+      } else {
+          // No service history, so the starting point is the engine's 'birth'
+          if (hasSwappedEngine) {
+            lastServicePoint = engineKmsAtSwapNum;
+          } else {
+            lastServicePoint = 0;
+          }
+      }
+    } else {
+      // For chassis items, the logic is simple
+      currentKms = chassisKmsNum;
+      lastServicePoint = lastServiceNum;
     }
-
-
-    const kmsSinceLastService = currentKms - lastServicePoint;
-
-    if (kmsSinceLastService >= item.intervalKms) {
-      return { isDue: true, kmsSinceLastService, lastServicePoint, currentKms };
-    }
-
-    return { isDue: false, kmsSinceLastService, lastServicePoint, currentKms };
+  
+    const kmsSinceLastService = Math.max(0, currentKms - lastServicePoint);
+  
+    const isDue = kmsSinceLastService >= item.intervalKms;
+  
+    return { isDue, kmsSinceLastService, lastServicePoint, currentKms };
   };
 
   const processedSchedule = schedule.map(item => {
