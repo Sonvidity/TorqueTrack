@@ -23,6 +23,9 @@ const BASE_INTERVALS: Interval[] = [
   { item: 'Timing Belt', intervalKms: 100000, intervalMonths: 72 },
 ];
 
+export const SERVICE_ITEMS = BASE_INTERVALS.map(item => item.item);
+
+
 const MODEL_OVERRIDES: ModelSpecificIntervals = {
   '86 / BRZ (ZN6)': {
     'Engine Oil & Filter': { item: 'Engine Oil & Filter', intervalKms: 8000, intervalMonths: 6 },

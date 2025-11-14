@@ -54,8 +54,8 @@ export function ServiceScheduleDisplay({ schedule, formValues }: ServiceSchedule
 
     let lastServicePoint = 0;
 
-    // Rule 1: Was the specific item serviced recently?
-    if (lastServiceKms && lastServiceItems?.toLowerCase().includes(item.item.toLowerCase())) {
+    // Rule 1: Was the specific item serviced recently? (checked in the form)
+    if (lastServiceKms && lastServiceItems?.includes(item.item)) {
         if (isEngineItem) {
             // Service was recorded at chassis KMs. We need to find the equivalent *engine* KMs at that time.
             if(hasSwappedEngine && engineSwapKms && engineKmsAtSwap && lastServiceKms > engineSwapKms) {
@@ -67,7 +67,8 @@ export function ServiceScheduleDisplay({ schedule, formValues }: ServiceSchedule
             lastServicePoint = lastServiceKms;
         }
     } 
-    // Rule 2: If not, was there a general service performed? (Use last service kms as the baseline)
+    // Rule 2: If the specific item wasn't checked, but a general service was performed, use that as the baseline.
+    // This assumes that if a major item wasn't specifically ticked, it was at least inspected or not due at the last service.
     else if (lastServiceKms) {
          if (isEngineItem) {
             if(hasSwappedEngine && engineSwapKms && engineKmsAtSwap && lastServiceKms > engineSwapKms) {
@@ -83,7 +84,7 @@ export function ServiceScheduleDisplay({ schedule, formValues }: ServiceSchedule
             lastServicePoint = lastServiceKms;
         }
     }
-    // Rule 3: If no service history, but engine was swapped, the swap is the service point for engine items.
+    // Rule 3: If no service history, but engine was swapped, the swap itself is the service point for engine items.
     else if (isEngineItem && hasSwappedEngine && engineKmsAtSwap) {
         lastServicePoint = engineKmsAtSwap;
     }

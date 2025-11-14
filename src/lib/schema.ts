@@ -16,7 +16,7 @@ export const formSchema = z.object({
   engineSwapKms: z.number().min(0, "KMs must be a positive number.").optional(),
   engineKmsAtSwap: z.number().min(0, "KMs must be a positive number.").optional(),
   lastServiceKms: z.number().min(0, "KMs must be a positive number.").optional(),
-  lastServiceItems: z.string().optional(),
+  lastServiceItems: z.array(z.string()).optional(),
 }).refine(data => {
     if (data.hasSwappedEngine) {
         // If engine is swapped, we need the swap history to calculate engine KMs.

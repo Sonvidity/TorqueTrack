@@ -8,6 +8,7 @@ import type { z } from "zod";
 import { getServiceScheduleAction, saveVehicleAction, type ActionResponse } from "@/app/actions";
 import { formSchema, type FormValues } from "@/lib/schema";
 import { vehicles, commonEngineSwaps } from "@/lib/vehicles";
+import { SERVICE_ITEMS } from "@/lib/service-data";
 import { useUser } from "@/firebase/index";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
@@ -24,7 +25,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
@@ -100,7 +100,7 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
       superchargerKit: "",
       engineSwap: "stock",
       lastServiceKms: 166000,
-      lastServiceItems: "Oil Change, Oil Filter",
+      lastServiceItems: ["Engine Oil & Filter"],
       engineSwapKms: 110000,
       engineKmsAtSwap: 60000,
     },
@@ -233,7 +233,7 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
                   <FormField control={form.control} name="chassisKms" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Chassis KMs</FormLabel>
-                      <FormControl><Input type="text" inputMode="numeric" pattern="[0-9]*" placeholder="e.g., 100000" {...field} onChange={e => {
+                      <FormControl><Input type="text" inputMode="numeric" placeholder="e.g., 100000" {...field} onChange={e => {
                           const value = e.target.value.replace(/[^0-9]/g, '');
                           field.onChange(value === '' ? 0 : parseInt(value, 10));
                         }} /></FormControl>
@@ -355,7 +355,7 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
                        <FormField control={form.control} name="engineSwapKms" render={({ field }) => (
                         <FormItem>
                           <FormLabel>Chassis KMs at Swap</FormLabel>
-                          <FormControl><Input type="text" inputMode="numeric" pattern="[0-9]*" placeholder="e.g., 120000" {...field} onChange={e => {
+                          <FormControl><Input type="text" inputMode="numeric" placeholder="e.g., 120000" {...field} onChange={e => {
                               const value = e.target.value.replace(/[^0-9]/g, '');
                               field.onChange(value === '' ? 0 : parseInt(value, 10));
                             }} /></FormControl>
@@ -366,7 +366,7 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
                        <FormField control={form.control} name="engineKmsAtSwap" render={({ field }) => (
                         <FormItem>
                           <FormLabel>Engine KMs at Swap</FormLabel>
-                          <FormControl><Input type="text" inputMode="numeric" pattern="[0-9]*" placeholder="e.g., 76000" {...field} onChange={e => {
+                          <FormControl><Input type="text" inputMode="numeric" placeholder="e.g., 76000" {...field} onChange={e => {
                               const value = e.target.value.replace(/[^0-9]/g, '');
                               field.onChange(value === '' ? 0 : parseInt(value, 10));
                             }} /></FormControl>
@@ -376,27 +376,69 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
                       )} />
                     </div>
                   )}
-                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-6">
                     <FormField control={form.control} name="lastServiceKms" render={({ field }) => (
                         <FormItem>
                           <FormLabel>KMs at Last Service</FormLabel>
-                           <FormControl><Input type="text" inputMode="numeric" pattern="[0-9]*" placeholder="e.g., 75000" {...field} onChange={e => {
+                           <FormControl><Input type="text" inputMode="numeric" placeholder="e.g., 75000" {...field} onChange={e => {
                               const value = e.target.value.replace(/[^0-9]/g, '');
-                              field.onChange(value === '' ? 0 : parseInt(value, 10));
+                               field.onChange(value === '' ? undefined : parseInt(value, 10));
                             }} /></FormControl>
-                          <FormDescription>Odometer reading at your last service.</FormDescription>
+                          <FormDescription>Odometer reading at your last service. Leave blank if never serviced.</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )} />
                   </div>
-                   <FormField control={form.control} name="lastServiceItems" render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Items Serviced</FormLabel>
-                          <FormControl><Textarea placeholder="e.g., Oil change, Spark plugs, Air filter. If engine was swapped, mention if a full service was done." {...field} /></FormControl>
-                           <FormDescription>List the main items that were replaced or serviced.</FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )} />
+                    <FormField
+                        control={form.control}
+                        name="lastServiceItems"
+                        render={() => (
+                            <FormItem>
+                            <div className="mb-4">
+                                <FormLabel>Items Serviced</FormLabel>
+                                <FormDescription>
+                                Select the main items that were replaced or serviced.
+                                </FormDescription>
+                            </div>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            {SERVICE_ITEMS.map((item) => (
+                                <FormField
+                                key={item}
+                                control={form.control}
+                                name="lastServiceItems"
+                                render={({ field }) => {
+                                    return (
+                                    <FormItem
+                                        key={item}
+                                        className="flex flex-row items-start space-x-3 space-y-0"
+                                    >
+                                        <FormControl>
+                                        <Checkbox
+                                            checked={field.value?.includes(item)}
+                                            onCheckedChange={(checked) => {
+                                            return checked
+                                                ? field.onChange([...(field.value || []), item])
+                                                : field.onChange(
+                                                    field.value?.filter(
+                                                    (value) => value !== item
+                                                    )
+                                                )
+                                            }}
+                                        />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                        {item}
+                                        </FormLabel>
+                                    </FormItem>
+                                    )
+                                }}
+                                />
+                            ))}
+                            </div>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
                 </TabsContent>
                 </div>
               </Tabs>
