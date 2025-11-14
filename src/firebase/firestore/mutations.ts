@@ -8,13 +8,15 @@ import type { Vehicle } from '@/lib/schema';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { firebaseConfig } from '../config';
 
-// Helper function to initialize Firestore for server-side actions
+// This helper is for use in server-side contexts like actions, where hooks aren't available.
+// It ensures Firebase is initialized only once.
 const getDb = () => {
     if (!getApps().length) {
         const app = initializeApp(firebaseConfig);
         // Use initializeFirestore to avoid issues with multiple instances in server actions
         return initializeFirestore(app, {});
     }
+    // If already initialized (e.g. on the client), get the existing instance.
     return getFirestore(getApp());
 }
 

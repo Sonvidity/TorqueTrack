@@ -21,13 +21,15 @@ export const formSchema = z.object({
   lastServiceItems: z.array(z.string()).optional(),
 }).refine(data => {
     if (data.hasSwappedEngine) {
-        // If engine is swapped, we need the swap history to calculate engine KMs.
-        return data.engineSwapKms !== undefined && data.engineKmsAtSwap !== undefined;
+        // If engine is swapped, these fields are necessary for accurate calculation.
+        return data.engineSwapKms !== undefined && data.engineSwapKms !== null &&
+               data.engineKmsAtSwap !== undefined && data.engineKmsAtSwap !== null;
     }
     return true;
 }, {
-    message: "Chassis KMs and Engine KMs at the time of swap are required when engine is swapped.",
-    path: ["engineSwapKms"], // You can point to a relevant field
+    // This message will appear if the logic returns false
+    message: "Chassis KMs and Engine KMs at the time of swap are required if the engine has been replaced.",
+    path: ["engineSwapKms"], // You can associate the error with a specific field
 });
 
 export type FormValues = z.infer<typeof formSchema>;
