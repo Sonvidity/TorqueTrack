@@ -94,7 +94,7 @@ export async function saveVehicleAction(userId: string, values: FormValues): Pro
     }
 
     try {
-        saveVehicleToDb(userId, vehicleId, vehicleData);
+        await saveVehicleToDb(userId, vehicleId, vehicleData);
         return { success: true, vehicleId: vehicleId };
     } catch (e) {
         console.error('Failed to save vehicle:', e)
