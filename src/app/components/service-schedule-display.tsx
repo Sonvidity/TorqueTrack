@@ -99,43 +99,39 @@ export function ServiceScheduleDisplay({ schedule, formValues, vehicle }: Servic
         lastServiceItems
     } = formValues;
 
-    const currentEngineKms = (hasSwappedEngine && engineSwapKms && engineKmsAtSwap)
+    // 1. Determine the current KMS of the component (engine or chassis)
+    const currentEngineKms = (hasSwappedEngine && typeof engineSwapKms === 'number' && typeof engineKmsAtSwap === 'number')
         ? (chassisKms - engineSwapKms) + engineKmsAtSwap
         : chassisKms;
     
     const currentKms = isEngineItem ? currentEngineKms : chassisKms;
 
-    let lastServicePoint = 0;
+    // 2. Determine the starting KMS point for this service item (lastServicePoint)
+    let lastServicePoint = 0; // Default to 0 if never serviced
 
-    if (lastServiceKms !== undefined && lastServiceItems?.includes(item.item)) {
+    const itemWasServiced = lastServiceItems?.includes(item.item);
+    
+    if (typeof lastServiceKms === 'number') {
+        // A last service exists, this is our primary reference point
         if (isEngineItem) {
-            if(hasSwappedEngine && engineSwapKms && engineKmsAtSwap && lastServiceKms > engineSwapKms) {
+             // For engine items, we need to translate the chassisKms at last service to engineKms at that time
+            if (hasSwappedEngine && typeof engineSwapKms === 'number' && typeof engineKmsAtSwap === 'number' && lastServiceKms > engineSwapKms) {
+                // Service was done *after* the swap
                 lastServicePoint = (lastServiceKms - engineSwapKms) + engineKmsAtSwap;
             } else {
+                 // Service was done before the swap, or no swap
                 lastServicePoint = lastServiceKms;
             }
         } else {
+            // For chassis items, it's simple
             lastServicePoint = lastServiceKms;
         }
-    } 
-    else if (lastServiceKms !== undefined) {
-         if (isEngineItem) {
-            if(hasSwappedEngine && engineSwapKms && engineKmsAtSwap && lastServiceKms > engineSwapKms) {
-                lastServicePoint = (lastServiceKms - engineSwapKms) + engineKmsAtSwap;
-            } else {
-                lastServicePoint = lastServiceKms;
-            }
-        } else {
-            lastServicePoint = lastServiceKms;
-        }
-    }
-    else if (isEngineItem && hasSwappedEngine && engineKmsAtSwap) {
+    } else if (isEngineItem && hasSwappedEngine && typeof engineKmsAtSwap === 'number') {
+        // No general service history, but there was an engine swap, so the engine's life starts at its swap-in KMs.
         lastServicePoint = engineKmsAtSwap;
     }
-    else {
-        lastServicePoint = 0;
-    }
-    
+
+
     const kmsSinceLastService = currentKms - lastServicePoint;
 
     if (kmsSinceLastService >= item.intervalKms) {
