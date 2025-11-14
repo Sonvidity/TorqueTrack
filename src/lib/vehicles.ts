@@ -161,7 +161,8 @@ export const vehicles: Vehicle[] = [
       { name: "Golf GTI (MK6)", years: Array.from({ length: 2012 - 2009 + 1 }, (_, i) => 2009 + i), engine: "EA888 Gen1/2" },
       { name: "Golf GTI (MK7)", years: Array.from({ length: 2020 - 2013 + 1 }, (_, i) => 2013 + i), engine: "EA888 Gen3" },
       { name: "Golf R (MK6)", years: Array.from({ length: 2012 - 2009 + 1 }, (_, i) => 2009 + i), engine: "EA113" },
-      { name: "Golf R (MK7)", years: Array.from({ length: 2020 - 2013 + 1 }, (_, i) => 2013 + i), engine: "EA888 Gen3" },
+      { name: "Golf R (MK7)", years: Array.from({ length: 2017 - 2013 + 1 }, (_, i) => 2013 + i), engine: "EA888 Gen3" },
+      { name: "Golf R (MK7.5)", years: Array.from({ length: 2020 - 2017 + 1 }, (_, i) => 2017 + i), engine: "EA888 Gen3" },
     ],
   }
 ];
@@ -181,5 +182,3 @@ export const commonEngineSwaps = [
     { name: 'Ford Barra', value: 'Barra' },
     { name: 'Other / Custom', value: 'custom' },
 ];
-
-    

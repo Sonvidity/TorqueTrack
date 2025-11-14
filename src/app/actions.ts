@@ -46,6 +46,7 @@ export async function getServiceScheduleAction(values: FormValues): Promise<Acti
     const standardIntervals = getStandardServiceIntervals({
       make: validatedFields.data.make,
       model: validatedFields.data.model,
+      transmission: validatedFields.data.transmission,
     });
 
     const ruleInput = mapFormToRuleInput(validatedFields.data, standardIntervals.intervals);

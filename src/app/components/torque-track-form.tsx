@@ -91,6 +91,7 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
       make: "Toyota",
       model: "86 / BRZ (ZN6)",
       year: 2012,
+      transmission: "manual",
       chassisKms: 170325,
       hasSwappedEngine: true,
       drivingHabits: "Spirited Weekend Drives",
@@ -227,6 +228,32 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
                       </FormItem>
                     )} />
                   </div>
+                  <FormField
+                    control={form.control}
+                    name="transmission"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Transmission</FormLabel>
+                        <FormControl>
+                          <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex items-center space-x-4 pt-2">
+                              <FormItem className="flex items-center space-x-2 space-y-0">
+                                  <FormControl>
+                                      <RadioGroupItem value="automatic" />
+                                  </FormControl>
+                                  <FormLabel className="font-normal">Automatic</FormLabel>
+                              </FormItem>
+                              <FormItem className="flex items-center space-x-2 space-y-0">
+                                  <FormControl>
+                                      <RadioGroupItem value="manual" />
+                                  </FormControl>
+                                  <FormLabel className="font-normal">Manual</FormLabel>
+                              </FormItem>
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </TabsContent>
 
                 <TabsContent value="usage" className="space-y-6">
@@ -382,7 +409,7 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
                           <FormLabel>KMs at Last Service</FormLabel>
                            <FormControl><Input type="text" inputMode="numeric" placeholder="e.g., 75000" {...field} onChange={e => {
                               const value = e.target.value.replace(/[^0-9]/g, '');
-                               field.onChange(value === '' ? undefined : parseInt(value, 10));
+                               field.onChange(value === '' ? 0 : parseInt(value, 10));
                             }} /></FormControl>
                           <FormDescription>Odometer reading at your last service. Leave blank if never serviced.</FormDescription>
                           <FormMessage />

@@ -35,6 +35,10 @@ const MODEL_OVERRIDES: ModelSpecificIntervals = {
     'Engine Oil & Filter': { item: 'Engine Oil & Filter', intervalKms: 10000, intervalMonths: 12 },
     'Transmission Fluid (Automatic)': { item: 'Transmission Fluid (Automatic)', intervalKms: 60000, intervalMonths: 36 }, // DSG Service
   },
+  'Golf R (MK7.5)': {
+    'Engine Oil & Filter': { item: 'Engine Oil & Filter', intervalKms: 10000, intervalMonths: 12 },
+    'Transmission Fluid (Automatic)': { item: 'Transmission Fluid (Automatic)', intervalKms: 60000, intervalMonths: 36 }, // DSG Service
+  },
   'Commodore (VE)': {
     'Engine Oil & Filter': { item: 'Engine Oil & Filter', intervalKms: 15000, intervalMonths: 12 },
   }
@@ -44,14 +48,23 @@ const MODEL_OVERRIDES: ModelSpecificIntervals = {
 type GetStandardServiceIntervalsInput = {
   make: string;
   model: string;
+  transmission: 'automatic' | 'manual';
 };
 
 export function getStandardServiceIntervals(input: GetStandardServiceIntervalsInput) {
-  const { model } = input;
+  const { model, transmission } = input;
   const modelSpecificIntervals = MODEL_OVERRIDES[model] || {};
 
   const intervals = BASE_INTERVALS.map(baseItem => {
     return modelSpecificIntervals[baseItem.item] || baseItem;
+  }).filter(item => {
+    if (transmission === 'automatic' && item.item === 'Transmission Fluid (Manual)') {
+      return false;
+    }
+    if (transmission === 'manual' && item.item === 'Transmission Fluid (Automatic)') {
+      return false;
+    }
+    return true;
   });
 
   return { intervals };
