@@ -1,12 +1,14 @@
 
 import { z } from "zod";
 
+const numberOrEmptyString = z.union([z.number().min(0, "KMs must be a positive number."), z.string().length(0)]).optional().transform(e => e === "" ? undefined : e);
+
 export const formSchema = z.object({
   make: z.string().min(1, "Make is required."),
   model: z.string().min(1, "Model is required."),
   year: z.number().min(1900, "Invalid year.").max(new Date().getFullYear() + 1, "Invalid year."),
   transmission: z.string().min(1, "Transmission is required."),
-  chassisKms: z.number().min(0, "KMs must be a positive number."),
+  chassisKms: numberOrEmptyString.transform(val => val ?? 0).pipe(z.number().min(0)),
   hasSwappedEngine: z.boolean().default(false),
   engineKms: z.number().min(0, "KMs must be a positive number.").optional(),
   drivingHabits: z.string().min(1, "Driving habits are required."),
@@ -15,9 +17,9 @@ export const formSchema = z.object({
   turboType: z.string().optional(),
   superchargerKit: z.string().optional(),
   engineSwap: z.string(),
-  engineSwapKms: z.number().min(0, "KMs must be a positive number.").optional(),
-  engineKmsAtSwap: z.number().min(0, "KMs must be a positive number.").optional(),
-  lastServiceKms: z.number().min(0, "KMs must be a positive number.").optional(),
+  engineSwapKms: numberOrEmptyString,
+  engineKmsAtSwap: numberOrEmptyString,
+  lastServiceKms: numberOrEmptyString,
   lastServiceItems: z.array(z.string()).optional(),
 }).refine(data => {
     if (data.hasSwappedEngine) {

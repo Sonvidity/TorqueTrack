@@ -262,7 +262,7 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
                       <FormLabel>Chassis KMs</FormLabel>
                       <FormControl><Input type="text" inputMode="numeric" placeholder="e.g., 100000" {...field} onChange={e => {
                           const value = e.target.value.replace(/[^0-9]/g, '');
-                          field.onChange(value === '' ? 0 : parseInt(value, 10));
+                          field.onChange(value === '' ? '' : parseInt(value, 10));
                         }} /></FormControl>
                       <FormDescription>Total kilometers on the vehicle's body.</FormDescription><FormMessage />
                     </FormItem>
@@ -384,7 +384,7 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
                           <FormLabel>Chassis KMs at Swap</FormLabel>
                            <FormControl><Input type="text" inputMode="numeric" placeholder="e.g., 120000" {...field} onChange={e => {
                                 const value = e.target.value.replace(/[^0-9]/g, '');
-                                field.onChange(value === '' ? undefined : parseInt(value, 10));
+                                field.onChange(value === '' ? '' : parseInt(value, 10));
                             }} /></FormControl>
                           <FormDescription>KMs on the car when the new engine was installed.</FormDescription>
                           <FormMessage />
@@ -395,7 +395,7 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
                           <FormLabel>Engine KMs at Swap</FormLabel>
                            <FormControl><Input type="text" inputMode="numeric" placeholder="e.g., 76000" {...field} onChange={e => {
                                 const value = e.target.value.replace(/[^0-9]/g, '');
-                                field.onChange(value === '' ? undefined : parseInt(value, 10));
+                                field.onChange(value === '' ? '' : parseInt(value, 10));
                             }} /></FormControl>
                           <FormDescription>KMs on the replacement engine when it was installed.</FormDescription>
                           <FormMessage />
@@ -409,7 +409,7 @@ export function TorqueTrackForm({ onMakeChange }: TorqueTrackFormProps) {
                           <FormLabel>KMs at Last Service</FormLabel>
                            <FormControl><Input type="text" inputMode="numeric" placeholder="e.g., 75000" {...field} onChange={e => {
                                 const value = e.target.value.replace(/[^0-9]/g, '');
-                                field.onChange(value === '' ? undefined : parseInt(value, 10));
+                                field.onChange(value === '' ? '' : parseInt(value, 10));
                             }} /></FormControl>
                           <FormDescription>Odometer reading at your last service. Leave blank if never serviced.</FormDescription>
                           <FormMessage />
